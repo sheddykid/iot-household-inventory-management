@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "author": "Babalola Emmanuel",
+  "editor": "wokwi",
+  "parts": [
+    { "type": "board-esp32-devkit-c-v4", "id": "esp", "top": 100, "left": 400, "attrs": {} },
+    {
+      "type": "wokwi-hx711",
+      "id": "cell1",
+      "top": -199,
+      "left": 473,
+      "attrs": { "type": "50kg" }
+    },
+    {
+      "type": "board-ssd1306",
+      "id": "oled1",
+      "top": 425.54,
+      "left": 576.23,
+      "attrs": { "i2cAddress": "0x3c" }
+    },
+    { "type": "board-mfrc522", "id": "rfid1", "top": 122.15, "left": 915.44, "attrs": {} }
+  ],
+  "connections": [
+    [ "esp:3V3", "cell1:VCC", "red", [ "h-1.41", "v-272.8" ] ],
+    [ "cell1:GND", "esp:GND.1", "black", [ "h-124.8", "v426.1" ] ],
+    [ "cell1:DT", "esp:26", "green", [ "h-105.6", "v377.9" ] ],
+    [ "cell1:SCK", "esp:25", "blue", [ "h-86.4", "v358.4" ] ],
+    [ "esp:3V3", "oled1:VCC", "red", [ "v-42.4", "h219.24" ] ],
+    [ "esp:GND.2", "oled1:GND", "black", [] ],
+    [ "esp:21", "oled1:SDA", "green", [] ],
+    [ "esp:22", "oled1:SCL", "blue", [] ],
+    [ "esp:GND.3", "rfid1:GND", "black", [] ],
+    [ "esp:5", "rfid1:RST", "orange", [] ],
+    [ "esp:4", "rfid1:SDA", "yellow", [ "h363.24", "v-80.8" ] ],
+    [ "esp:23", "rfid1:MOSI", "purple", [ "h372.84", "v44" ] ],
+    [ "esp:19", "rfid1:MISO", "brown", [] ],
+    [ "esp:18", "rfid1:SCK", "grey", [ "h190.44", "v-32.8" ] ],
+    [ "rfid1:3.3V", "esp:3V3", "red", [ "h-28.8", "v-163.2", "h-488.19" ] ]
+  ],
+  "dependencies": {}
+}
