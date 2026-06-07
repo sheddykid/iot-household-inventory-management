@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Household Inventory Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --card: #111827;
+      --border: #1e2d45;
+      --accent: #00d4aa;
+      --accent2: #ff6b6b;
+      --accent3: #ffd93d;
+      --accent4: #6bcbff;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --rice: #00d4aa;
+      --beans: #ff6b6b;
+      --garri: #ffd93d;
+      --detergent: #6bcbff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Syne', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Animated background grid */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0,212,170,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,212,170,0.03) 1px, transparent 1px);
+      background-size: 40px 40px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    /* Header */
+    header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 2.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .header-left h1 {
+      font-size: 2rem;
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      line-height: 1.1;
+    }
+
+    .header-left h1 span {
+      color: var(--accent);
+    }
+
+    .header-left p {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.4rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+
+    .live-badge {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0,212,170,0.1);
+      border: 1px solid rgba(0,212,170,0.3);
+      padding: 0.4rem 0.9rem;
+      border-radius: 999px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--accent);
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.8); }
+    }
+
+    /* Date Range Controls */
+    .controls {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .controls label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .controls input[type="datetime-local"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.6rem 0.9rem;
+      border-radius: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.75rem;
+      outline: none;
+      transition: border-color 0.2s;
+      width: 200px;
+    }
+
+    .controls input[type="datetime-local"]:focus {
+      border-color: var(--accent);
+    }
+
+    .quick-btns {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .quick-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.5rem 0.9rem;
+      border-radius: 8px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .quick-btn:hover, .quick-btn.active {
+      background: rgba(0,212,170,0.1);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .fetch-btn {
+      background: var(--accent);
+      border: none;
+      color: #0a0e1a;
+      padding: 0.6rem 1.4rem;
+      border-radius: 8px;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: auto;
+    }
+
+    .fetch-btn:hover {
+      background: #00f0c0;
+      transform: translateY(-1px);
+    }
+
+    .fetch-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .divider {
+      width: 1px;
+      height: 40px;
+      background: var(--border);
+    }
+
+    /* Stat Cards */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+      .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.2rem;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover { transform: translateY(-2px); }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+
+    .stat-card.rice::before   { background: var(--rice); }
+    .stat-card.beans::before  { background: var(--beans); }
+    .stat-card.garri::before  { background: var(--garri); }
+    .stat-card.detergent::before { background: var(--detergent); }
+
+    .stat-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.6rem;
+    }
+
+    .stat-name {
+      font-size: 1rem;
+      font-weight: 800;
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-card.rice .stat-name     { color: var(--rice); }
+    .stat-card.beans .stat-name    { color: var(--beans); }
+    .stat-card.garri .stat-name    { color: var(--garri); }
+    .stat-card.detergent .stat-name { color: var(--detergent); }
+
+    .stat-weight {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .stat-weight span {
+      font-size: 0.7rem;
+      color: var(--muted);
+    }
+
+    .stat-bar-wrap {
+      margin-top: 0.8rem;
+      background: var(--bg);
+      border-radius: 999px;
+      height: 6px;
+      overflow: hidden;
+    }
+
+    .stat-bar {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.8s ease;
+    }
+
+    .stat-card.rice .stat-bar      { background: var(--rice); }
+    .stat-card.beans .stat-bar     { background: var(--beans); }
+    .stat-card.garri .stat-bar     { background: var(--garri); }
+    .stat-card.detergent .stat-bar { background: var(--detergent); }
+
+    .stat-pct {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-top: 0.4rem;
+    }
+
+    /* Chart */
+    .chart-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .chart-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .chart-title {
+      font-size: 1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .chart-subtitle {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      margin-top: 0.2rem;
+    }
+
+    .toggle-btns {
+      display: flex;
+      gap: 0.4rem;
+    }
+
+    .toggle-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.4rem 0.8rem;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-transform: uppercase;
+    }
+
+    .toggle-btn.active {
+      background: rgba(0,212,170,0.1);
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 350px;
+    }
+
+    /* Status & Loading */
+    .status-bar {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.7rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 1rem;
+      border: 1px dashed var(--border);
+      border-radius: 12px;
+      margin-bottom: 2rem;
+    }
+
+    .status-bar.loading { color: var(--accent); border-color: var(--accent); }
+    .status-bar.error   { color: var(--accent2); border-color: var(--accent2); }
+    .status-bar.success { color: var(--accent); border-color: transparent; }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      padding: 2rem 0 1rem;
+      border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <header>
+    <div class="header-left">
+      <h1>Household <span>Inventory</span><br>Management System</h1>
+      <p>Final Year Project &mdash; Babalola Emmanuel Timilehin &mdash; RUN/CPE/20/8934</p>
+    </div>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      ThingSpeak Live
+    </div>
+  </header>
+
+  <!-- Controls -->
+  <div class="controls">
+    <div>
+      <label>From</label>
+      <input type="datetime-local" id="fromDate"/>
+    </div>
+    <div>
+      <label>To</label>
+      <input type="datetime-local" id="toDate"/>
+    </div>
+    <div class="divider"></div>
+    <div>
+      <label>Quick Range</label>
+      <div class="quick-btns">
+        <button class="quick-btn" onclick="setRange(1)">1D</button>
+        <button class="quick-btn" onclick="setRange(3)">3D</button>
+        <button class="quick-btn active" onclick="setRange(7)">7D</button>
+        <button class="quick-btn" onclick="setRange(30)">30D</button>
+        <button class="quick-btn" onclick="setRange(0)">All</button>
+      </div>
+    </div>
+    <button class="fetch-btn" onclick="fetchData()" id="fetchBtn">Fetch Data</button>
+  </div>
+
+  <!-- Status -->
+  <div class="status-bar" id="statusBar">Select a date range and click Fetch Data to load your inventory data.</div>
+
+  <!-- Stat Cards -->
+  <div class="stat-grid">
+    <div class="stat-card rice">
+      <div class="stat-label">Item 01</div>
+      <div class="stat-name">Rice</div>
+      <div class="stat-weight" id="riceWt">-- <span>g</span></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="riceBar" style="width:0%"></div></div>
+      <div class="stat-pct" id="ricePct">Stock: --%</div>
+    </div>
+    <div class="stat-card beans">
+      <div class="stat-label">Item 02</div>
+      <div class="stat-name">Beans</div>
+      <div class="stat-weight" id="beansWt">-- <span>g</span></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="beansBar" style="width:0%"></div></div>
+      <div class="stat-pct" id="beansPct">Stock: --%</div>
+    </div>
+    <div class="stat-card garri">
+      <div class="stat-label">Item 03</div>
+      <div class="stat-name">Garri</div>
+      <div class="stat-weight" id="garriWt">-- <span>g</span></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="garriBar" style="width:0%"></div></div>
+      <div class="stat-pct" id="garriPct">Stock: --%</div>
+    </div>
+    <div class="stat-card detergent">
+      <div class="stat-label">Item 04</div>
+      <div class="stat-name">Detergent</div>
+      <div class="stat-weight" id="detWt">-- <span>g</span></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="detBar" style="width:0%"></div></div>
+      <div class="stat-pct" id="detPct">Stock: --%</div>
+    </div>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-card">
+    <div class="chart-header">
+      <div>
+        <div class="chart-title">Weight Over Time</div>
+        <div class="chart-subtitle" id="chartSubtitle">No data loaded yet</div>
+      </div>
+      <div class="toggle-btns">
+        <button class="toggle-btn active" onclick="switchChart('weight', this)">Weight (g)</button>
+        <button class="toggle-btn" onclick="switchChart('stock', this)">Stock (%)</button>
+      </div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="mainChart"></canvas>
+    </div>
+  </div>
+
+  <footer>
+    IoT Household Inventory Management System &mdash; ESP32 + HX711 + MFRC522 + ThingSpeak &mdash; &copy; 2026
+  </footer>
+
+</div>
+
+<script>
+  const CHANNEL_ID  = 3399453;
+  const READ_KEY    = '03Y0EYTKSY2G4CS3';
+
+  const ITEMS = [
+    { name: 'Rice',      weightField: 1, stockField: 2, color: '#00d4aa', max: 5000 },
+    { name: 'Beans',     weightField: 3, stockField: 4, color: '#ff6b6b', max: 1200 },
+    { name: 'Garri',     weightField: 5, stockField: 6, color: '#ffd93d', max: 3000 },
+    { name: 'Detergent', weightField: 7, stockField: 8, color: '#6bcbff', max: 250  },
+  ];
+
+  let chartMode = 'weight';
+  let allData   = null;
+  let myChart   = null;
+
+  // Init chart
+  const ctx = document.getElementById('mainChart').getContext('2d');
+  myChart = new Chart(ctx, {
+    type: 'line',
+    data: { labels: [], datasets: [] },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#94a3b8',
+            font: { family: 'Space Mono', size: 11 },
+            boxWidth: 12, boxHeight: 12,
+          }
+        },
+        tooltip: {
+          backgroundColor: '#111827',
+          borderColor: '#1e2d45',
+          borderWidth: 1,
+          titleColor: '#e2e8f0',
+          bodyColor: '#94a3b8',
+          titleFont: { family: 'Syne', weight: '700' },
+          bodyFont: { family: 'Space Mono', size: 11 },
+        }
+      },
+      scales: {
+        x: {
+          ticks: { color: '#64748b', font: { family: 'Space Mono', size: 10 }, maxTicksLimit: 8 },
+          grid: { color: 'rgba(30,45,69,0.5)' },
+        },
+        y: {
+          ticks: { color: '#64748b', font: { family: 'Space Mono', size: 10 } },
+          grid: { color: 'rgba(30,45,69,0.5)' },
+        }
+      }
+    }
+  });
+
+  // Set default date range to last 7 days
+  setRange(7);
+
+  function setRange(days) {
+    document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
+    event && event.target && event.target.classList.add('active');
+
+    const now  = new Date();
+    const from = new Date();
+
+    if (days === 0) {
+      document.getElementById('fromDate').value = '2024-01-01T00:00';
+    } else {
+      from.setDate(now.getDate() - days);
+      document.getElementById('fromDate').value = toLocalDatetime(from);
+    }
+    document.getElementById('toDate').value = toLocalDatetime(now);
+  }
+
+  function toLocalDatetime(date) {
+    const d = new Date(date - date.getTimezoneOffset() * 60000);
+    return d.toISOString().slice(0, 16);
+  }
+
+  async function fetchData() {
+    const fromVal = document.getElementById('fromDate').value;
+    const toVal   = document.getElementById('toDate').value;
+
+    if (!fromVal || !toVal) {
+      setStatus('Please select both From and To dates.', 'error');
+      return;
+    }
+
+    const fromISO = new Date(fromVal).toISOString();
+    const toISO   = new Date(toVal).toISOString();
+
+    setStatus('Fetching data from ThingSpeak...', 'loading');
+    document.getElementById('fetchBtn').disabled = true;
+
+    try {
+      const url = `https://api.thingspeak.com/channels/${CHANNEL_ID}/feeds.json` +
+                  `?api_key=${READ_KEY}&start=${encodeURIComponent(fromISO)}&end=${encodeURIComponent(toISO)}&results=500`;
+
+      const res  = await fetch(url);
+      const json = await res.json();
+
+      if (!json.feeds || json.feeds.length === 0) {
+        setStatus('No data found in the selected date range. Try a wider range.', 'error');
+        document.getElementById('fetchBtn').disabled = false;
+        return;
+      }
+
+      allData = json.feeds;
+      renderChart(allData);
+      updateStatCards(allData);
+      setStatus(`Loaded ${allData.length} data point(s) from ${new Date(fromVal).toLocaleDateString()} to ${new Date(toVal).toLocaleDateString()}`, 'success');
+      document.getElementById('chartSubtitle').textContent =
+        `${allData.length} entries · ${new Date(fromVal).toLocaleDateString()} → ${new Date(toVal).toLocaleDateString()}`;
+
+    } catch (err) {
+      setStatus('Error fetching data. Check your internet connection.', 'error');
+      console.error(err);
+    }
+
+    document.getElementById('fetchBtn').disabled = false;
+  }
+
+  function renderChart(feeds) {
+    const labels = feeds.map(f => {
+      const d = new Date(f.created_at);
+      return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short' }) +
+             ' ' + d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+    });
+
+    const datasets = ITEMS.map(item => {
+      const fieldKey = chartMode === 'weight'
+        ? `field${item.weightField}`
+        : `field${item.stockField}`;
+
+      return {
+        label: item.name,
+        data: feeds.map(f => f[fieldKey] ? parseFloat(f[fieldKey]) : null),
+        borderColor: item.color,
+        backgroundColor: item.color + '18',
+        pointBackgroundColor: item.color,
+        pointRadius: feeds.length < 20 ? 5 : 3,
+        pointHoverRadius: 7,
+        borderWidth: 2,
+        tension: 0.3,
+        spanGaps: true,
+      };
+    });
+
+    myChart.data.labels   = labels;
+    myChart.data.datasets = datasets;
+    myChart.options.scales.y.title = {
+      display: true,
+      text: chartMode === 'weight' ? 'Weight (g)' : 'Stock (%)',
+      color: '#64748b',
+      font: { family: 'Space Mono', size: 10 }
+    };
+    myChart.update();
+  }
+
+  function updateStatCards(feeds) {
+    const latest = feeds[feeds.length - 1];
+    const ids = [
+      { wId: 'riceWt',  pId: 'ricePct',  bId: 'riceBar',  wf: 'field1', sf: 'field2', max: 5000 },
+      { wId: 'beansWt', pId: 'beansPct', bId: 'beansBar', wf: 'field3', sf: 'field4', max: 1200 },
+      { wId: 'garriWt', pId: 'garriPct', bId: 'garriBar', wf: 'field5', sf: 'field6', max: 3000 },
+      { wId: 'detWt',   pId: 'detPct',   bId: 'detBar',   wf: 'field7', sf: 'field8', max: 250  },
+    ];
+
+    // Find last non-null value for each item
+    ids.forEach(item => {
+      let weight = null, stock = null;
+      for (let i = feeds.length - 1; i >= 0; i--) {
+        if (weight === null && feeds[i][item.wf]) weight = parseFloat(feeds[i][item.wf]);
+        if (stock  === null && feeds[i][item.sf]) stock  = parseFloat(feeds[i][item.sf]);
+        if (weight !== null && stock !== null) break;
+      }
+
+      if (weight !== null) {
+        document.getElementById(item.wId).innerHTML = `${weight.toFixed(1)} <span>g</span>`;
+      }
+      if (stock !== null) {
+        document.getElementById(item.pId).textContent = `Stock: ${stock.toFixed(0)}%`;
+        document.getElementById(item.bId).style.width = `${Math.min(stock, 100)}%`;
+      }
+    });
+  }
+
+  function switchChart(mode, btn) {
+    chartMode = mode;
+    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (allData) renderChart(allData);
+  }
+
+  function setStatus(msg, type) {
+    const el = document.getElementById('statusBar');
+    el.textContent = msg;
+    el.className = 'status-bar ' + (type || '');
+  }
+</script>
+</body>
+</html>
