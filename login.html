@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Login — Household Inventory</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #0a0e1a;
+      --card: #111827;
+      --text: #e2e8f0;
+      --muted: #64748b;
+      --accent: #00d4aa;
+    }
+    html,body{height:100%}
+    body{
+      margin:0; font-family:'Syne',sans-serif; background:var(--bg); color:var(--text);
+      display:flex; align-items:center; justify-content:center;
+    }
+    .card{
+      width:360px; background:var(--card); border-radius:12px; padding:28px;
+      box-shadow:0 8px 40px rgba(0,0,0,0.6);
+      border:1px solid rgba(255,255,255,0.03);
+    }
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 18px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px}
+    label{display:block;font-family:'Space Mono',monospace;color:var(--muted);font-size:12px;margin-top:12px}
+    input[type="text"], input[type="password"]{
+      width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);
+      background:#0b1220; color:var(--text); outline:none; box-sizing:border-box;
+    }
+    .actions{display:flex;align-items:center;gap:10px;margin-top:18px}
+    button{
+      background:var(--accent); border:none; color:#07101a; padding:10px 14px; border-radius:8px;
+      font-weight:700; cursor:pointer;
+    }
+    .note{font-family:'Space Mono',monospace;color:var(--muted);font-size:12px;margin-top:14px}
+    .error{color:#ff6b6b;font-family:'Space Mono',monospace;margin-top:10px;font-size:13px}
+    .small{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace}
+    .link{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px 10px;border-radius:8px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="card" role="main" aria-labelledby="title">
+    <h1 id="title">Sign in</h1>
+    <p class="lead">Household Inventory Management — demo login</p>
+
+    <form id="loginForm" autocomplete="off">
+      <label for="user">Username or email</label>
+      <input id="user" name="user" type="text" placeholder="admin" required />
+
+      <label for="pass">Password</label>
+      <input id="pass" name="pass" type="password" placeholder="••••••••" required />
+
+      <div class="actions">
+        <button type="submit">Sign in</button>
+        <button type="button" class="link" id="demoBtn">Fill demo</button>
+      </div>
+
+      <div class="error" id="err" role="alert" style="display:none"></div>
+
+      <p class="note">
+        Demo credential: <span class="small">admin / password123</span><br/>
+        This is client-only authentication (localStorage). It's convenient for demos but not secure for production.
+      </p>
+    </form>
+  </div>
+
+  <script>
+    // Demo credentials (hard-coded for client-only demo)
+    const DEMO_USER = 'admin';
+    const DEMO_PASS = 'password123';
+
+    const form = document.getElementById('loginForm');
+    const errEl = document.getElementById('err');
+    const demoBtn = document.getElementById('demoBtn');
+
+    demoBtn.addEventListener('click', () => {
+      document.getElementById('user').value = DEMO_USER;
+      document.getElementById('pass').value = DEMO_PASS;
+    });
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      errEl.style.display = 'none';
+      const user = document.getElementById('user').value.trim();
+      const pass = document.getElementById('pass').value;
+
+      // Basic client-side check (insecure). Replace with server auth in production.
+      if ((user === DEMO_USER && pass === DEMO_PASS) || (user === 'user' && pass === 'user')) {
+        try {
+          localStorage.setItem('him_auth', 'true');
+          localStorage.setItem('him_user', user);
+        } catch (ex) {
+          // fallback: cookies could be used, but localStorage is easiest for this demo
+        }
+        // Redirect to dashboard
+        window.location.href = 'index.html';
+      } else {
+        errEl.textContent = 'Invalid username or password. Try the demo credentials.';
+        errEl.style.display = 'block';
+      }
+    });
+
+    // Optional: if user is already authenticated, go to dashboard
+    try {
+      if (localStorage.getItem('him_auth') === 'true') {
+        window.location.href = 'index.html';
+      }
+    } catch(e){}
+  </script>
+</body>
+</html>
