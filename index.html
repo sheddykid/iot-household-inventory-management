@@ -499,6 +499,23 @@
     .status-bar.error   { color: var(--accent2); border-color: var(--accent2); }
     .status-bar.success { color: var(--accent); border-color: transparent; }
 
+    .form-group {
+  margin-bottom: 15px;
+}
+
+label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+input[type="datetime-local"] {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
     /* ── FOOTER ── */
     footer {
       text-align: center;
@@ -551,14 +568,14 @@
 
   <!-- Controls -->
   <div class="controls">
-    <div>
-      <label>From</label>
-      <input type="datetime-local" id="fromDate"/>
-    </div>
-    <div>
-      <label>To</label>
-      <input type="datetime-local" id="toDate"/>
-    </div>
+    <div class="form-group">
+  <label for="fromDate">From Date:</label>
+  <input type="datetime-local" id="fromDate" name="fromDate">
+</div>
+    <div class="form-group">
+  <label for="toDate">To Date:</label>
+  <input type="datetime-local" id="toDate" name="toDate">
+</div>
     <div class="divider"></div>
     <div>
       <label>Quick Range</label>
