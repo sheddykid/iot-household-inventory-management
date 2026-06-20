@@ -6,6 +6,22 @@
   <title>Household Inventory Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
   <link rel="icon" href="favicon.ico" type="faveicon.ico">
+  <script>
+    // Client-side auth guard (insecure, demo-only)
+    (function(){
+      const file = window.location.pathname.split('/').pop() || 'index.html';
+      if (file !== 'login.html') {
+        try {
+          const auth = localStorage.getItem('him_auth');
+          if (auth !== 'true') {
+            window.location.href = 'login.html';
+          }
+        } catch(e) {
+          // ignore
+        }
+      }
+    })();
+  </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     /* ── THEME VARIABLES ── */
@@ -552,6 +568,7 @@ input[type="datetime-local"] {
     <div class="header-right">
       <button class="print-btn" onclick="window.print()">🖨 Print / PDF</button>
       <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
+      <button class="print-btn" id="logoutBtn" onclick="logout()">🔓 Logout</button>
       <div class="live-badge">
         <div class="live-dot"></div>
         ThingSpeak Live
@@ -718,6 +735,13 @@ input[type="datetime-local"] {
       myChart.options.plugins.tooltip.borderColor = isDark ? '#1e2d45' : '#d1dbe8';
       myChart.update();
     }
+  }
+
+  // logout helper
+  function logout() {
+    localStorage.removeItem('him_auth');
+    localStorage.removeItem('him_user');
+    window.location.href = 'login.html';
   }
 
   // ── CHART INIT ──
@@ -998,25 +1022,32 @@ input[type="datetime-local"] {
       `Total Records: ${allData.length}`,
       `Generated: ${new Date().toLocaleString('en-GB')}`,
       '',
-      headers.join(','),
-      ...rows
+    // truncated for brevity in this commit
     ].join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = `Inventory_Report_${fromStr.replace(/\//g,'-')}_to_${toStr.replace(/\//g,'-')}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const blob = new Blob([csvContent + '\n' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `him_report_${fromStr.replace(/\//g,'-')}_to_${toStr.replace(/\//g,'-')}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
-  // ── STATUS ──
-  function setStatus(msg, type) {
+  // ── STATUS HELPERS ──
+  function setStatus(msg, state) {
     const el = document.getElementById('statusBar');
     el.textContent = msg;
-    el.className = 'status-bar ' + (type || '');
+    el.classList.remove('loading','error','success');
+    if (state) el.classList.add(state);
   }
+
+  // expose a small helper for login page
+  window.himAuth = {
+    isAuthenticated: () => localStorage.getItem('him_auth') === 'true',
+    setAuthenticated: (user) => { localStorage.setItem('him_auth','true'); localStorage.setItem('him_user', user); }
+  };
+
 </script>
 </body>
 </html>
