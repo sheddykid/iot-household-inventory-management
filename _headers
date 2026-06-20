@@ -1,5 +1,10 @@
 /*
   Cache-Control: public, max-age=0, must-revalidate
   X-Content-Type-Options: nosniff
-  X-Frame-Options: DENY
+  
+  # Modern replacement for X-Frame-Options
+  Content-Security-Policy: frame-ancestors 'self'
+  
+  # Extra recommended security headers
   Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()
