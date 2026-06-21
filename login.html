@@ -1,3 +1,4 @@
+<!-- version: 2026-06-21T22:30Z copilot: login.html updated -->
 <!doctype html>
 <html lang="en" data-theme="dark">
 <head>
@@ -5,189 +6,117 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Login — Household Inventory</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
+  <!-- Supabase SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
   <style>
-    :root {
-      --bg: #0a0e1a;
-      --card: #111827;
-      --text: #e2e8f0;
-      --muted: #64748b;
-      --accent: #00d4aa;
-      --danger: #ff6b6b;
-    }
+    :root { --bg:#0a0e1a; --card:#111827; --text:#e2e8f0; --muted:#64748b; --accent:#00d4aa; --danger:#ff6b6b }
     html,body{height:100%}
-    body{
-      margin:0; font-family:'Syne',sans-serif; background:var(--bg); color:var(--text);
-      display:flex; align-items:center; justify-content:center;
-    }
-    .card{
-      width:360px; background:var(--card); border-radius:12px; padding:22px 24px;
-      box-shadow:0 8px 40px rgba(0,0,0,0.6);
-      border:1px solid rgba(255,255,255,0.03);
-    }
+    body{margin:0;font-family:'Syne',sans-serif;background:var(--bg);color:var(--text);display:flex;align-items:center;justify-content:center}
+    .card{width:380px;background:var(--card);border-radius:12px;padding:22px 24px;box-shadow:0 8px 40px rgba(0,0,0,0.6);border:1px solid rgba(255,255,255,0.03)}
     h1{margin:0 0 6px;font-size:20px}
     p.lead{margin:0 0 12px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px}
     label{display:block;font-family:'Space Mono',monospace;color:var(--muted);font-size:12px;margin-top:12px}
     .field{position:relative}
-    input[type="text"], input[type="password"]{
-      width:100%; padding:10px 12px; border-radius:8px; border:1px solid rgba(255,255,255,0.04);
-      background:#0b1220; color:var(--text); outline:none; box-sizing:border-box;
-    }
-    .toggle-pw{position:absolute; right:8px; top:50%; transform:translateY(-50%); background:transparent;border:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:6px}
+    input[type="text"],input[type="password"]{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:#0b1220;color:var(--text);outline:none;box-sizing:border-box}
+    .toggle-pw{position:absolute;right:8px;top:50%;transform:translateY(-50%);background:transparent;border:none;color:var(--muted);cursor:pointer;padding:6px;border-radius:6px}
+    .tabs{display:flex;gap:8px;margin-top:6px}
+    .tab{flex:1;padding:8px;border-radius:8px;background:transparent;border:1px solid rgba(255,255,255,0.02);text-align:center;cursor:pointer;color:var(--muted)}
+    .tab.active{background:rgba(0,212,170,0.08);border-color:var(--accent);color:var(--accent)}
     .actions{display:flex;align-items:center;gap:10px;margin-top:16px}
-    button{background:var(--accent); border:none; color:#07101a; padding:10px 14px; border-radius:8px; font-weight:700; cursor:pointer}
+    button{background:var(--accent);border:none;color:#07101a;padding:10px 14px;border-radius:8px;font-weight:700;cursor:pointer}
     .note{font-family:'Space Mono',monospace;color:var(--muted);font-size:12px;margin-top:12px}
     .error{color:var(--danger);font-family:'Space Mono',monospace;margin-top:10px;font-size:13px}
     .small{font-size:12px;color:var(--muted);font-family:'Space Mono',monospace}
     .link{background:transparent;border:1px solid rgba(255,255,255,0.04);color:var(--muted);padding:8px 10px;border-radius:8px;cursor:pointer}
-    .remember{display:flex;align-items:center;gap:8px;margin-top:10px}
-    .audit-panel{margin-top:12px; background:#07101a;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.02);font-family:'Space Mono',monospace;color:var(--muted);max-height:160px;overflow:auto}
-    .audit-row{padding:6px 8px;border-bottom:1px dashed rgba(255,255,255,0.02);font-size:13px}
-    .audit-row:last-child{border-bottom:none}
+    .info{margin-top:10px;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px}
     .disabled{opacity:0.6;pointer-events:none}
   </style>
 </head>
 <body>
   <div class="card" role="main" aria-labelledby="title">
     <h1 id="title">Sign in</h1>
-    <p class="lead">Household Inventory Management — demo login</p>
+    <p class="lead">Household Inventory Management — secure login (Supabase)</p>
 
-    <form id="loginForm" autocomplete="off">
-      <label for="user">Username or email</label>
-      <div class="field"><input id="user" name="user" type="text" placeholder="admin" required /></div>
+    <div class="tabs" role="tablist">
+      <div class="tab active" id="tab-signin" role="tab">Sign in</div>
+      <div class="tab" id="tab-signup" role="tab">Sign up</div>
+      <div class="tab" id="tab-reset" role="tab">Reset</div>
+    </div>
 
-      <label for="pass">Password</label>
+    <form id="authForm" autocomplete="off">
+      <label for="user">Email</label>
+      <div class="field"><input id="user" name="user" type="text" placeholder="you@example.com" required /></div>
+
+      <label for="pass" id="passLabel">Password</label>
       <div class="field">
-        <input id="pass" name="pass" type="password" placeholder="••••••••" required />
+        <input id="pass" name="pass" type="password" placeholder="••••••••" />
         <button type="button" class="toggle-pw" id="togglePw" aria-label="Show password">👁</button>
       </div>
 
       <div class="remember">
-        <input id="remember" type="checkbox" /> <label for="remember" style="margin:0;font-weight:400;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;">Remember me</label>
+        <input id="remember" type="checkbox" /> <label for="remember" style="margin:0;font-weight:400;color:var(--muted);font-family:'Space Mono',monospace;font-size:12px;">Keep me signed in</label>
       </div>
 
       <div class="actions">
         <button type="submit" id="submitBtn">Sign in</button>
-        <button type="button" class="link" id="demoBtn">Fill demo</button>
+        <button type="button" class="link" id="cancelBtn" style="display:none">Cancel</button>
       </div>
 
       <div class="error" id="err" role="alert" style="display:none"></div>
 
-      <p class="note">
-        Demo credential: <span class="small">admin / password123</span>
-      </p>
-
-      <button type="button" id="viewAudit" class="link" style="margin-top:8px">Show recent login attempts</button>
-      <div id="auditPanel" class="audit-panel" style="display:none"></div>
+      <p class="note">If you don't have an account, use Sign up. Password reset sends a confirmation email.</p>
+      <div class="info" id="infoMsg" style="display:none"></div>
     </form>
   </div>
 
   <script>
-    // Demo credentials (hard-coded for client-only demo)
-    const DEMO_USER = 'admin';
-    const DEMO_PASS = 'password123';
-
-    const form = document.getElementById('loginForm');
-    const errEl = document.getElementById('err');
-    const demoBtn = document.getElementById('demoBtn');
-    const togglePw = document.getElementById('togglePw');
+    // UI state
+    const tabSignin = document.getElementById('tab-signin');
+    const tabSignup = document.getElementById('tab-signup');
+    const tabReset  = document.getElementById('tab-reset');
     const passInput = document.getElementById('pass');
+    const togglePw  = document.getElementById('togglePw');
+    const form = document.getElementById('authForm');
+    const errEl = document.getElementById('err');
+    const infoEl = document.getElementById('infoMsg');
     const submitBtn = document.getElementById('submitBtn');
-    const viewAudit = document.getElementById('viewAudit');
-    const auditPanel = document.getElementById('auditPanel');
+    const cancelBtn = document.getElementById('cancelBtn');
 
-    // Audit logging (client-side only)
-    function auditLog(user, success, reason) {
-      try {
-        const raw = localStorage.getItem('him_audit') || '[]';
-        const arr = JSON.parse(raw);
-        arr.unshift({ ts: new Date().toISOString(), user: user || '', success: !!success, reason: reason || '' });
-        localStorage.setItem('him_audit', JSON.stringify(arr.slice(0, 200)));
-      } catch(e){ }
-    }
+    let mode = 'signin';
+    function setMode(m){mode=m;tabSignin.classList.toggle('active',m==='signin');tabSignup.classList.toggle('active',m==='signup');tabReset.classList.toggle('active',m==='reset');document.getElementById('passLabel').style.display = m==='reset' ? 'none' : 'block';passInput.style.display = m==='reset' ? 'none' : 'block';togglePw.style.display = m==='reset' ? 'none' : 'inline-block';document.getElementById('remember').style.display = m==='reset' ? 'none' : 'inline-block';submitBtn.textContent = m==='signin' ? 'Sign in' : (m==='signup' ? 'Create account' : 'Reset password');errEl.style.display='none';infoEl.style.display='none';cancelBtn.style.display = m==='signin' ? 'none' : 'inline-block';}
+    tabSignin.addEventListener('click',()=>setMode('signin'));
+    tabSignup.addEventListener('click',()=>setMode('signup'));
+    tabReset.addEventListener('click',()=>setMode('reset'));
+    cancelBtn.addEventListener('click',()=>setMode('signin'));
+    togglePw.addEventListener('click',()=>{const t = passInput.getAttribute('type')==='password' ? 'text' : 'password';passInput.setAttribute('type',t);togglePw.textContent = t==='password' ? '👁' : '🙈';togglePw.setAttribute('aria-pressed', t==='text');});
 
-    function renderAudit() {
-      try {
-        const raw = localStorage.getItem('him_audit') || '[]';
-        const arr = JSON.parse(raw);
-        if (!arr.length) { auditPanel.innerHTML = '<div class="small">No recent attempts</div>'; return; }
-        auditPanel.innerHTML = arr.map(a => `<div class="audit-row"><strong>${a.success? 'OK':'FAIL'}</strong> — ${new Date(a.ts).toLocaleString()} — <span style="color:var(--muted)">${a.user}</span>${a.reason? ' — '+a.reason : ''}</div>`).join('');
-      } catch(e){ auditPanel.innerHTML = '<div class="small">Unable to read audit log</div>'; }
-    }
+    // Supabase init
+    let supabaseClient = null;
+    try{
+      if(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase){
+        supabaseClient = supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+      } else { console.warn('Supabase config missing. Create supabase-config.js from supabase-config.example.js'); }
+    }catch(e){console.error('Supabase init error',e)}
 
-    viewAudit.addEventListener('click', () => {
-      if (auditPanel.style.display === 'none') {
-        renderAudit(); auditPanel.style.display = 'block'; viewAudit.textContent = 'Hide recent login attempts';
-      } else { auditPanel.style.display = 'none'; viewAudit.textContent = 'Show recent login attempts'; }
-    });
+    if(!supabaseClient){ submitBtn.classList.add('disabled'); submitBtn.disabled = true; errEl.textContent = 'Supabase not configured. Add supabase-config.js to the site root (see supabase-config.example.js).'; errEl.style.display = 'block'; }
 
-    demoBtn.addEventListener('click', () => {
-      document.getElementById('user').value = DEMO_USER;
-      document.getElementById('pass').value = DEMO_PASS;
-      document.getElementById('remember').checked = true;
-    });
-
-    togglePw.addEventListener('click', () => {
-      const t = passInput.getAttribute('type') === 'password' ? 'text' : 'password';
-      passInput.setAttribute('type', t);
-      togglePw.textContent = t === 'password' ? '👁' : '🙈';
-      togglePw.setAttribute('aria-pressed', t === 'text');
-    });
-
-    // helper: set auth with remember option
-    function setAuthenticated(user, remember) {
-      try {
-        localStorage.setItem('him_auth', 'true');
-        localStorage.setItem('him_user', user);
-        if (remember) {
-          localStorage.removeItem('him_session_expires');
-        } else {
-          // expire in 30 minutes
-          const expires = Date.now() + 30 * 60 * 1000;
-          localStorage.setItem('him_session_expires', String(expires));
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault(); if(!supabaseClient) return; errEl.style.display='none'; infoEl.style.display='none'; submitBtn.classList.add('disabled'); submitBtn.disabled=true;
+      const email = document.getElementById('user').value.trim(); const password = document.getElementById('pass').value; const remember = document.getElementById('remember').checked;
+      if(!email || (mode !== 'reset' && !password)){ errEl.textContent='Please enter required fields.'; errEl.style.display='block'; submitBtn.classList.remove('disabled'); submitBtn.disabled=false; return; }
+      try{
+        if(mode === 'signin'){
+          const res = await supabaseClient.auth.signInWithPassword({email,password}); if(res.error) throw res.error; window.location.href='index.html';
+        } else if(mode === 'signup'){
+          const res = await supabaseClient.auth.signUp({email,password}); if(res.error) throw res.error; infoEl.textContent='Signup successful. Check your email for confirmation (if enabled).'; infoEl.style.display='block'; setMode('signin');
+        } else if(mode === 'reset'){
+          const res = await supabaseClient.auth.resetPasswordForEmail(email); if(res.error) throw res.error; infoEl.textContent='Password reset email sent (check your inbox).'; infoEl.style.display='block';
         }
-      } catch(e){}
-    }
-
-    form.addEventListener('submit', (e) => {
-      e.preventDefault();
-      errEl.style.display = 'none';
-      submitBtn.classList.add('disabled');
-      submitBtn.disabled = true;
-
-      const user = document.getElementById('user').value.trim();
-      const pass = document.getElementById('pass').value;
-      const remember = document.getElementById('remember').checked;
-
-      // small validation
-      if (!user || !pass) {
-        errEl.textContent = 'Please enter username and password.'; errEl.style.display = 'block'; auditLog(user, false, 'empty'); submitBtn.classList.remove('disabled'); submitBtn.disabled = false; return;
-      }
-
-      // Simulate authentication delay
-      setTimeout(() => {
-        const ok = (user === DEMO_USER && pass === DEMO_PASS) || (user === 'user' && pass === 'user');
-        if (ok) {
-          setAuthenticated(user, remember);
-          auditLog(user, true, 'login');
-          // redirect
-          window.location.href = 'index.html';
-        } else {
-          auditLog(user, false, 'invalid');
-          errEl.textContent = 'Invalid username or password. Try the demo credentials.';
-          errEl.style.display = 'block';
-          submitBtn.classList.remove('disabled'); submitBtn.disabled = false;
-        }
-      }, 650);
+      }catch(err){ console.error(err); errEl.textContent = err.message || String(err); errEl.style.display='block'; }
+      submitBtn.classList.remove('disabled'); submitBtn.disabled=false;
     });
 
-    // Optional: if user is already authenticated and not expired, go to dashboard
-    try {
-      const auth = localStorage.getItem('him_auth');
-      const exp = localStorage.getItem('him_session_expires');
-      if (auth === 'true' && (!exp || Date.now() < parseInt(exp,10))) {
-        window.location.href = 'index.html';
-      }
-    } catch(e){}
+    (async function checkSession(){ try{ if(!supabaseClient) return; const { data } = await supabaseClient.auth.getSession(); if(data && data.session) window.location.href='index.html'; }catch(e){console.warn('session check failed',e);} })();
   </script>
 </body>
 </html>
