@@ -7,12 +7,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
   <link rel="icon" href="favicon.ico" type="faveicon.ico">
   <script>
-    // Client-side auth guard (insecure, demo-only) - original demo guard retained 
-    (function(){ const file = window.location.pathname.split('/').pop() || 'index.html'; if (file !== 'login.html') { try { const auth = localStorage.getItem('him_auth'); if (auth !== 'true') { window.location.href = 'login.html'; } } catch(e) {
-      /* ignore */
-    } } })(); // logout helper (original demo implementation)
-    function logout() { localStorage.removeItem('him_auth'); localStorage.removeItem('him_user'); window.location.href = 'login.html'; } </script>
-  <script>
     // Client-side auth guard (insecure, demo-only)
     (function(){
       const file = window.location.pathname.split('/').pop() || 'index.html';
@@ -1004,56 +998,54 @@ input[type="datetime-local"] {
 
     const headers = [
       'Date & Time',
-      'Rice Weight (g)', 'Rice Stock (%)',
-      'Beans Weight (g)', 'Beans Stock (%)',
-      'Garri Weight (g)', 'Garri Stock (%)',
-      'Detergent Weight (g)', 'Detergent Stock (%)'
+      'Rice (g)',
+      'Rice Stock (%)',
+      'Beans (g)',
+      'Beans Stock (%)',
+      'Garri (g)',
+      'Garri Stock (%)',
+      'Detergent (g)',
+      'Detergent Stock (%)'
     ];
 
     const rows = allData.map(f => {
       const d = new Date(f.created_at);
-      const dateStr = d.toLocaleDateString('en-GB') + ' ' + d.toLocaleTimeString('en-GB');
+      const dateStr = d.toLocaleDateString('en-GB') + ' ' +
+                      d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
       return [
         dateStr,
-        f.field1||'', f.field2||'',
-        f.field3||'', f.field4||'',
-        f.field5||'', f.field6||'',
-        f.field7||'', f.field8||''
-      ].join(',');
+        f.field1 || '',
+        f.field2 || '',
+        f.field3 || '',
+        f.field4 || '',
+        f.field5 || '',
+        f.field6 || '',
+        f.field7 || '',
+        f.field8 || ''
+      ];
     });
 
-    const csvContent = [
-      `Household Inventory Management System`,
-      `Report Date Range: ${fromStr} to ${toStr}`,
-      `Total Records: ${allData.length}`,
-      `Generated: ${new Date().toLocaleString('en-GB')}`,
-      '',
-    // truncated for brevity in this commit
-    ].join('\n');
-
-    const blob = new Blob([csvContent + '\n' + rows.join('\n')], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = `him_report_${fromStr.replace(/\//g,'-')}_to_${toStr.replace(/\//g,'-')}.csv`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(','))].join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `inventory_${fromStr.replace(/\//g,'-')}_to_${toStr.replace(/\//g,'-')}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
   }
 
-  // ── STATUS HELPERS ──
-  function setStatus(msg, state) {
+  // ── STATUS HELPER ──
+  function setStatus(msg, type='') {
     const el = document.getElementById('statusBar');
     el.textContent = msg;
-    el.classList.remove('loading','error','success');
-    if (state) el.classList.add(state);
+    el.className = 'status-bar ' + (type || '');
   }
 
-  // expose a small helper for login page
-  window.himAuth = {
-    isAuthenticated: () => localStorage.getItem('him_auth') === 'true',
-    setAuthenticated: (user) => { localStorage.setItem('him_auth','true'); localStorage.setItem('him_user', user); }
-  };
-
+  // ── INITIAL DATA / UTILITIES ──
+  function toFixedOrDash(v, digits=1) { return v ? parseFloat(v).toFixed(digits) : '--'; }
 </script>
 </body>
 </html>
