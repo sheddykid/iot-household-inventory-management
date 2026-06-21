@@ -6,22 +6,7 @@
   <title>Household Inventory Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
   <link rel="icon" href="favicon.ico" type="faveicon.ico">
-  <script>
-    // Client-side auth guard (insecure, demo-only)
-    (function(){
-      const file = window.location.pathname.split('/').pop() || 'index.html';
-      if (file !== 'login.html') {
-        try {
-          const auth = localStorage.getItem('him_auth');
-          if (auth !== 'true') {
-            window.location.href = 'login.html';
-          }
-        } catch(e) {
-          // ignore
-        }
-      }
-    })();
-  </script>
+<script> // Client-side auth guard (insecure, demo-only) (function(){ const file = window.location.pathname.split('/').pop() || 'index.html'; if (file !== 'login.html') { try { const auth = localStorage.getItem('him_auth'); if (auth !== 'true') { window.location.href = 'login.html'; } } catch(e) { // ignore } } })(); </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     /* ── THEME VARIABLES ── */
