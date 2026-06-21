@@ -7,6 +7,12 @@
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
   <link rel="icon" href="favicon.ico" type="faveicon.ico">
   <script>
+    // Client-side auth guard (insecure, demo-only) - original demo guard retained 
+    (function(){ const file = window.location.pathname.split('/').pop() || 'index.html'; if (file !== 'login.html') { try { const auth = localStorage.getItem('him_auth'); if (auth !== 'true') { window.location.href = 'login.html'; } } catch(e) {
+      /* ignore */
+    } } })(); // logout helper (original demo implementation)
+    function logout() { localStorage.removeItem('him_auth'); localStorage.removeItem('him_user'); window.location.href = 'login.html'; } </script>
+  <script>
     // Client-side auth guard (insecure, demo-only)
     (function(){
       const file = window.location.pathname.split('/').pop() || 'index.html';
