@@ -5,8 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Household Inventory Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
-  <link rel="icon" href="favicon.ico" type="faveicon.ico">
-<script> // Client-side auth guard (insecure, demo-only) (function(){ const file = window.location.pathname.split('/').pop() || 'index.html'; if (file !== 'login.html') { try { const auth = localStorage.getItem('him_auth'); if (auth !== 'true') { window.location.href = 'login.html'; } } catch(e) { // ignore } } })(); </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
   <style>
     /* ── THEME VARIABLES ── */
@@ -359,7 +357,7 @@
       height: 6px;
       overflow: hidden;
     }
-    .stat-bar { height: 8px; border-radius: 9999px; background-color: #4ade80; transition: width 0.6s ease; }
+    .stat-bar { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
     .stat-card.rice .stat-bar      { background: var(--rice); }
     .stat-card.beans .stat-bar     { background: var(--beans); }
     .stat-card.garri .stat-bar     { background: var(--garri); }
@@ -500,23 +498,6 @@
     .status-bar.error   { color: var(--accent2); border-color: var(--accent2); }
     .status-bar.success { color: var(--accent); border-color: transparent; }
 
-    .form-group {
-  margin-bottom: 15px;
-}
-
-label {
-  display: block;
-  margin-bottom: 5px;
-  font-weight: bold;
-}
-
-input[type="datetime-local"] {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
-
     /* ── FOOTER ── */
     footer {
       text-align: center;
@@ -553,7 +534,6 @@ input[type="datetime-local"] {
     <div class="header-right">
       <button class="print-btn" onclick="window.print()">🖨 Print / PDF</button>
       <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn" title="Toggle theme">🌙</button>
-      <button class="print-btn" id="logoutBtn" onclick="logout()">🔓 Logout</button>
       <div class="live-badge">
         <div class="live-dot"></div>
         ThingSpeak Live
@@ -570,14 +550,14 @@ input[type="datetime-local"] {
 
   <!-- Controls -->
   <div class="controls">
-    <div class="form-group">
-  <label for="fromDate">From Date:</label>
-  <input type="datetime-local" id="fromDate" name="fromDate">
-</div>
-    <div class="form-group">
-  <label for="toDate">To Date:</label>
-  <input type="datetime-local" id="toDate" name="toDate">
-</div>
+    <div>
+      <label>From</label>
+      <input type="datetime-local" id="fromDate"/>
+    </div>
+    <div>
+      <label>To</label>
+      <input type="datetime-local" id="toDate"/>
+    </div>
     <div class="divider"></div>
     <div>
       <label>Quick Range</label>
@@ -604,7 +584,7 @@ input[type="datetime-local"] {
       <div class="stat-label">Item 01</div>
       <div class="stat-name">Rice</div>
       <div class="stat-weight" id="riceWt">-- <span>g</span></div>
-      <div class="stat-bar-wrap"><div class="stat-bar" id="riceBar" style="width: 80%;"></div></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="riceBar" style="width:0%"></div></div>
       <div class="stat-pct" id="ricePct">Stock: --%</div>
       <div class="stat-scan" id="riceScan">Last scan: <strong>--</strong></div>
     </div>
@@ -612,7 +592,7 @@ input[type="datetime-local"] {
       <div class="stat-label">Item 02</div>
       <div class="stat-name">Beans</div>
       <div class="stat-weight" id="beansWt">-- <span>g</span></div>
-      <div class="stat-bar-wrap"><div class="stat-bar" id="beansBar" style="width: 80%;"></div></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="beansBar" style="width:0%"></div></div>
       <div class="stat-pct" id="beansPct">Stock: --%</div>
       <div class="stat-scan" id="beansScan">Last scan: <strong>--</strong></div>
     </div>
@@ -620,7 +600,7 @@ input[type="datetime-local"] {
       <div class="stat-label">Item 03</div>
       <div class="stat-name">Garri</div>
       <div class="stat-weight" id="garriWt">-- <span>g</span></div>
-      <div class="stat-bar-wrap"><div class="stat-bar" id="garriBar" style="width: 80%;"></div></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="garriBar" style="width:0%"></div></div>
       <div class="stat-pct" id="garriPct">Stock: --%</div>
       <div class="stat-scan" id="garriScan">Last scan: <strong>--</strong></div>
     </div>
@@ -628,7 +608,7 @@ input[type="datetime-local"] {
       <div class="stat-label">Item 04</div>
       <div class="stat-name">Detergent</div>
       <div class="stat-weight" id="detWt">-- <span>g</span></div>
-      <div class="stat-bar-wrap"><div class="stat-bar" id="detBar" style="width: 80%;"></div></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="detBar" style="width:0%"></div></div>
       <div class="stat-pct" id="detPct">Stock: --%</div>
       <div class="stat-scan" id="detScan">Last scan: <strong>--</strong></div>
     </div>
@@ -720,13 +700,6 @@ input[type="datetime-local"] {
       myChart.options.plugins.tooltip.borderColor = isDark ? '#1e2d45' : '#d1dbe8';
       myChart.update();
     }
-  }
-
-  // logout helper
-  function logout() {
-    localStorage.removeItem('him_auth');
-    localStorage.removeItem('him_user');
-    window.location.href = 'login.html';
   }
 
   // ── CHART INIT ──
@@ -983,54 +956,49 @@ input[type="datetime-local"] {
 
     const headers = [
       'Date & Time',
-      'Rice (g)',
-      'Rice Stock (%)',
-      'Beans (g)',
-      'Beans Stock (%)',
-      'Garri (g)',
-      'Garri Stock (%)',
-      'Detergent (g)',
-      'Detergent Stock (%)'
+      'Rice Weight (g)', 'Rice Stock (%)',
+      'Beans Weight (g)', 'Beans Stock (%)',
+      'Garri Weight (g)', 'Garri Stock (%)',
+      'Detergent Weight (g)', 'Detergent Stock (%)'
     ];
 
     const rows = allData.map(f => {
       const d = new Date(f.created_at);
-      const dateStr = d.toLocaleDateString('en-GB') + ' ' +
-                      d.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit' });
+      const dateStr = d.toLocaleDateString('en-GB') + ' ' + d.toLocaleTimeString('en-GB');
       return [
         dateStr,
-        f.field1 || '',
-        f.field2 || '',
-        f.field3 || '',
-        f.field4 || '',
-        f.field5 || '',
-        f.field6 || '',
-        f.field7 || '',
-        f.field8 || ''
-      ];
+        f.field1||'', f.field2||'',
+        f.field3||'', f.field4||'',
+        f.field5||'', f.field6||'',
+        f.field7||'', f.field8||''
+      ].join(',');
     });
 
-    const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(','))].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `inventory_${fromStr.replace(/\//g,'-')}_to_${toStr.replace(/\//g,'-')}.csv`;
-    document.body.appendChild(a);
+    const csvContent = [
+      `Household Inventory Management System`,
+      `Report Date Range: ${fromStr} to ${toStr}`,
+      `Total Records: ${allData.length}`,
+      `Generated: ${new Date().toLocaleString('en-GB')}`,
+      '',
+      headers.join(','),
+      ...rows
+    ].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `Inventory_Report_${fromStr.replace(/\//g,'-')}_to_${toStr.replace(/\//g,'-')}.csv`;
     a.click();
-    a.remove();
     URL.revokeObjectURL(url);
   }
 
-  // ── STATUS HELPER ──
-  function setStatus(msg, type='') {
+  // ── STATUS ──
+  function setStatus(msg, type) {
     const el = document.getElementById('statusBar');
     el.textContent = msg;
     el.className = 'status-bar ' + (type || '');
   }
-
-  // ── INITIAL DATA / UTILITIES ──
-  function toFixedOrDash(v, digits=1) { return v ? parseFloat(v).toFixed(digits) : '--'; }
 </script>
 </body>
 </html>
