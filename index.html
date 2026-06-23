@@ -134,7 +134,6 @@
       50% { opacity: 0.4; transform: scale(0.8); }
     }
 
-    /* Theme toggle */
     .theme-toggle {
       background: var(--card);
       border: 1px solid var(--border);
@@ -149,7 +148,6 @@
     }
     .theme-toggle:hover { transform: rotate(20deg) scale(1.1); }
 
-    /* Print button */
     .print-btn {
       background: var(--card);
       border: 1px solid var(--border);
@@ -162,10 +160,7 @@
       transition: all 0.2s;
       display: flex; align-items: center; gap: 0.4rem;
     }
-    .print-btn:hover {
-      border-color: var(--accent4);
-      color: var(--accent4);
-    }
+    .print-btn:hover { border-color: var(--accent4); color: var(--accent4); }
 
     /* ── LOW STOCK ALERT ── */
     .alert-banner {
@@ -187,9 +182,7 @@
       color: var(--accent2);
       flex: 1;
     }
-    .alert-items {
-      display: flex; gap: 0.5rem; flex-wrap: wrap;
-    }
+    .alert-items { display: flex; gap: 0.5rem; flex-wrap: wrap; }
     .alert-tag {
       background: rgba(255,107,107,0.15);
       border: 1px solid rgba(255,107,107,0.3);
@@ -237,7 +230,6 @@
       transition: border-color 0.2s;
       cursor: pointer;
     }
-
     .controls select:focus { border-color: var(--accent); }
 
     .quick-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
@@ -255,7 +247,6 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-
     .quick-btn:hover, .quick-btn.active {
       background: rgba(0,212,170,0.1);
       border-color: var(--accent);
@@ -370,7 +361,6 @@
       margin-top: 0.4rem;
     }
 
-    /* Last scan timestamp */
     .stat-scan {
       font-family: 'Space Mono', monospace;
       font-size: 0.6rem;
@@ -381,7 +371,6 @@
     }
     .stat-scan strong { color: var(--accent); }
 
-    /* Weigh button in stat card */
     .stat-weigh-btn {
       background: transparent;
       border: 1px solid var(--border);
@@ -401,10 +390,7 @@
       background: rgba(0,212,170,0.1);
       border-color: var(--accent);
     }
-    .stat-weigh-btn:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+    .stat-weigh-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ── CHART ── */
     .chart-card {
@@ -706,7 +692,9 @@
 <script>
   const CHANNEL_ID = 3399453;
   const READ_KEY   = '03Y0EYTKSY2G4CS3';
-  const ESP_API_BASE = 'http://192.168.137.36'; // Update with your ESP IP
+
+  // ── CHANGE 1: ngrok HTTPS URL instead of local IP ──
+  const ESP_API_BASE = 'https://provider-fantastic-viable.ngrok-free.dev';
 
   const ITEMS = [
     { name: 'Rice',      weightField: 1, stockField: 2, color: '#00d4aa', max: 5000 },
@@ -778,7 +766,7 @@
 
   setRange(7, document.querySelector('.quick-btn.active'));
 
-  // ── DATE RANGE DROPDOWNS (Day / Month / Year) ──
+  // ── DATE RANGE DROPDOWNS ──
   function populateDateDropdowns() {
     const now = new Date();
     const fromDay = document.getElementById('fromDay');
@@ -788,11 +776,9 @@
     const toMonth = document.getElementById('toMonth');
     const toYear = document.getElementById('toYear');
 
-    // Years: show current year down to 2020
     const years = [];
     for (let y = now.getFullYear(); y >= 2020; y--) years.push(y);
 
-    // Months
     const months = [
       {v:1, n:'Jan'}, {v:2, n:'Feb'}, {v:3, n:'Mar'}, {v:4, n:'Apr'},
       {v:5, n:'May'}, {v:6, n:'Jun'}, {v:7, n:'Jul'}, {v:8, n:'Aug'},
@@ -819,11 +805,9 @@
     fill(fromYear, years.map(y => ({value: y, text: String(y)})), 'value', 'text');
     fill(toYear, years.map(y => ({value: y, text: String(y)})), 'value', 'text');
 
-    // Defaults: 7 days ago -> today
     setRange(7, document.querySelector('.quick-btn.active'));
   }
 
-  // Build ISO strings from selected parts
   function getFromISO() {
     const d = new Date(
       Number(document.getElementById('fromYear').value),
@@ -856,12 +840,9 @@
       from.setDate(now.getDate() - days);
     }
 
-    // set "From" selects
     document.getElementById('fromDay').value = from.getDate();
     document.getElementById('fromMonth').value = from.getMonth() + 1;
     document.getElementById('fromYear').value = from.getFullYear();
-
-    // set "To" selects to now / today
     document.getElementById('toDay').value = now.getDate();
     document.getElementById('toMonth').value = now.getMonth() + 1;
     document.getElementById('toYear').value = now.getFullYear();
@@ -916,44 +897,42 @@
   }
 
   // ── TRIGGER ESP WEIGH ──
+  // ── CHANGE 2: added ngrok-skip-browser-warning header ──
   async function triggerWeigh(itemIndex) {
     const itemName = ITEMS[itemIndex].name;
+    const btn = document.querySelectorAll('.stat-weigh-btn')[itemIndex];
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Weighing...'; }
     setStatus(`Triggering weigh for ${itemName}...`, 'loading');
 
-    // Detect mixed-content scenario: HTTPS page trying to call http:// device
-    if (location.protocol === 'https:' && ESP_API_BASE.startsWith('http://')) {
-      setStatus(
-        `Blocked: the page is served over HTTPS and cannot call a local HTTP device. Serve the page over HTTP locally or expose the ESP via HTTPS (ngrok) or use a secure proxy.`,
-        'error'
-      );
-      console.warn('Mixed content blocked: cannot call', ESP_API_BASE, 'from', location.href);
-      return;
-    }
-
     try {
-      // Try a normal fetch so we get meaningful CORS / network errors
       const response = await fetch(`${ESP_API_BASE}/weigh?item=${itemIndex}`, {
         method: 'GET',
-        // default mode 'cors' — your ESP must send Access-Control-Allow-Origin: * for this to succeed
+        headers: {
+          'ngrok-skip-browser-warning': 'true'  // ← bypasses ngrok warning page
+        }
       });
 
       if (!response.ok) {
         throw new Error(`HTTP ${response.status} ${response.statusText}`);
       }
 
-      setStatus(`${itemName} weigh triggered. Data will be available shortly.`, 'success');
+      const data = await response.json();
+      setStatus(
+        `${itemName} weighed successfully — ${data.weight_g}g. Refreshing data...`,
+        'success'
+      );
 
-      // Wait a moment, then fetch the latest data
-      setTimeout(() => {
-        fetchData();
-      }, 2000);
+      // Refresh ThingSpeak data after a short delay
+      setTimeout(() => fetchData(), 2500);
 
     } catch (err) {
       setStatus(
-        `Error triggering weigh for ${itemName}. Ensure the ESP is reachable from this device and supports CORS, or run the page over HTTP. (${err.message})`,
+        `Could not reach ESP for ${itemName}. Is ngrok still running? (${err.message})`,
         'error'
       );
       console.error('triggerWeigh error:', err);
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '⚖ Weigh Item'; }
     }
   }
 
@@ -1051,30 +1030,42 @@
     }
   }
 
-  // Placeholder functions for parts omitted from snippet (renderTable, exportExcel, setStatus, switchChart)
+  // ── TABLE ──
   function renderTable(feeds) {
     const tbody = document.getElementById('tableBody');
     tbody.innerHTML = '';
     feeds.forEach((f, i) => {
       const tr = document.createElement('tr');
       const d = new Date(f.created_at);
-      const dateStr = d.toLocaleString();
+
+      function stockClass(val) {
+        if (!val) return '';
+        const n = parseFloat(val);
+        if (n < 20) return 'td-low';
+        if (n < 50) return 'td-mod';
+        return 'td-ok';
+      }
+
       tr.innerHTML = `
         <td>${i+1}</td>
-        <td>${dateStr}</td>
-        <td>${f.field1||''}</td>
-        <td>${f.field2||''}</td>
-        <td>${f.field3||''}</td>
-        <td>${f.field4||''}</td>
-        <td>${f.field5||''}</td>
-        <td>${f.field6||''}</td>
-        <td>${f.field7||''}</td>
-        <td>${f.field8||''}</td>
+        <td>${d.toLocaleString()}</td>
+        <td>${f.field1 ? parseFloat(f.field1).toFixed(1) : '--'}</td>
+        <td class="${stockClass(f.field2)}">${f.field2 ? parseFloat(f.field2).toFixed(0)+'%' : '--'}</td>
+        <td>${f.field3 ? parseFloat(f.field3).toFixed(1) : '--'}</td>
+        <td class="${stockClass(f.field4)}">${f.field4 ? parseFloat(f.field4).toFixed(0)+'%' : '--'}</td>
+        <td>${f.field5 ? parseFloat(f.field5).toFixed(1) : '--'}</td>
+        <td class="${stockClass(f.field6)}">${f.field6 ? parseFloat(f.field6).toFixed(0)+'%' : '--'}</td>
+        <td>${f.field7 ? parseFloat(f.field7).toFixed(1) : '--'}</td>
+        <td class="${stockClass(f.field8)}">${f.field8 ? parseFloat(f.field8).toFixed(0)+'%' : '--'}</td>
       `;
       tbody.appendChild(tr);
     });
   }
-  function exportExcel() { alert('Export not implemented in this snippet.'); }
+
+  // ── EXPORT (placeholder) ──
+  function exportExcel() { alert('Export not implemented in this version.'); }
+
+  // ── STATUS ──
   function setStatus(msg, type) {
     const s = document.getElementById('statusBar');
     s.className = 'status-bar';
@@ -1083,14 +1074,14 @@
     if (type === 'success') s.classList.add('success');
     s.textContent = msg;
   }
+
+  // ── CHART SWITCH ──
   function switchChart(mode, btn) {
     chartMode = mode;
     document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
     if (allData) renderChart(allData);
   }
-
-  // End script
 </script>
 </body>
 </html>
