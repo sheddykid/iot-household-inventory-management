@@ -225,7 +225,7 @@
       margin-bottom: 0.4rem;
     }
 
-    .controls input[type="datetime-local"] {
+    .controls select {
       background: var(--input-bg);
       border: 1px solid var(--border);
       color: var(--text);
@@ -235,10 +235,10 @@
       font-size: 0.75rem;
       outline: none;
       transition: border-color 0.2s;
-      width: 200px;
+      cursor: pointer;
     }
 
-    .controls input[type="datetime-local"]:focus { border-color: var(--accent); }
+    .controls select:focus { border-color: var(--accent); }
 
     .quick-btns { display: flex; gap: 0.5rem; flex-wrap: wrap; }
 
@@ -262,7 +262,7 @@
       color: var(--accent);
     }
 
-    .btn-group { display: flex; gap: 0.5rem; margin-left: auto; }
+    .btn-group { display: flex; gap: 0.5rem; margin-left: auto; flex-wrap: wrap; }
 
     .fetch-btn {
       background: var(--accent);
@@ -380,6 +380,31 @@
       padding-top: 0.5rem;
     }
     .stat-scan strong { color: var(--accent); }
+
+    /* Weigh button in stat card */
+    .stat-weigh-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--accent);
+      padding: 0.4rem 0.7rem;
+      border-radius: 6px;
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-top: 0.6rem;
+      width: 100%;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .stat-weigh-btn:hover {
+      background: rgba(0,212,170,0.1);
+      border-color: var(--accent);
+    }
+    .stat-weigh-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
     /* ── CHART ── */
     .chart-card {
@@ -513,7 +538,7 @@
       body { background: white !important; color: black !important; }
       body::before { display: none; }
       .controls, .status-bar, .btn-group, .print-btn,
-      .theme-toggle, .toggle-btns { display: none !important; }
+      .theme-toggle, .toggle-btns, .stat-weigh-btn { display: none !important; }
       .chart-card, .stat-card, .table-card, .alert-banner {
         box-shadow: none !important;
         border: 1px solid #ccc !important;
@@ -551,12 +576,17 @@
   <!-- Controls -->
   <div class="controls">
     <div>
-      <label>From</label>
-      <input type="datetime-local" id="fromDate"/>
+      <label>From Date Range</label>
+      <select id="fromDate">
+        <option value="2024-01-01T00:00">January 1, 2024</option>
+        <option value="">-- Custom Start --</option>
+      </select>
     </div>
     <div>
-      <label>To</label>
-      <input type="datetime-local" id="toDate"/>
+      <label>To Date Range</label>
+      <select id="toDate">
+        <option value="">-- Select End Date --</option>
+      </select>
     </div>
     <div class="divider"></div>
     <div>
@@ -587,6 +617,7 @@
       <div class="stat-bar-wrap"><div class="stat-bar" id="riceBar" style="width:0%"></div></div>
       <div class="stat-pct" id="ricePct">Stock: --%</div>
       <div class="stat-scan" id="riceScan">Last scan: <strong>--</strong></div>
+      <button class="stat-weigh-btn" onclick="triggerWeigh(0)">⚖ Weigh Item</button>
     </div>
     <div class="stat-card beans">
       <div class="stat-label">Item 02</div>
@@ -595,6 +626,7 @@
       <div class="stat-bar-wrap"><div class="stat-bar" id="beansBar" style="width:0%"></div></div>
       <div class="stat-pct" id="beansPct">Stock: --%</div>
       <div class="stat-scan" id="beansScan">Last scan: <strong>--</strong></div>
+      <button class="stat-weigh-btn" onclick="triggerWeigh(1)">⚖ Weigh Item</button>
     </div>
     <div class="stat-card garri">
       <div class="stat-label">Item 03</div>
@@ -603,6 +635,7 @@
       <div class="stat-bar-wrap"><div class="stat-bar" id="garriBar" style="width:0%"></div></div>
       <div class="stat-pct" id="garriPct">Stock: --%</div>
       <div class="stat-scan" id="garriScan">Last scan: <strong>--</strong></div>
+      <button class="stat-weigh-btn" onclick="triggerWeigh(2)">⚖ Weigh Item</button>
     </div>
     <div class="stat-card detergent">
       <div class="stat-label">Item 04</div>
@@ -611,6 +644,7 @@
       <div class="stat-bar-wrap"><div class="stat-bar" id="detBar" style="width:0%"></div></div>
       <div class="stat-pct" id="detPct">Stock: --%</div>
       <div class="stat-scan" id="detScan">Last scan: <strong>--</strong></div>
+      <button class="stat-weigh-btn" onclick="triggerWeigh(3)">⚖ Weigh Item</button>
     </div>
   </div>
 
@@ -669,6 +703,7 @@
 <script>
   const CHANNEL_ID = 3399453;
   const READ_KEY   = '03Y0EYTKSY2G4CS3';
+  const ESP_API_BASE = 'http://192.168.4.1'; // Update with your ESP IP
 
   const ITEMS = [
     { name: 'Rice',      weightField: 1, stockField: 2, color: '#00d4aa', max: 5000 },
@@ -740,23 +775,64 @@
 
   setRange(7, document.querySelector('.quick-btn.active'));
 
-  // ── DATE RANGE ──
+  // ── DATE RANGE DROPDOWN ──
+  function populateDateDropdowns() {
+    const now = new Date();
+    const dates = [];
+
+    // Generate date options for the past year
+    for (let i = 0; i < 365; i++) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const dateStr = d.toISOString().slice(0, 10);
+      const label = d.toLocaleDateString('en-GB', { year: 'numeric', month: 'short', day: 'numeric' });
+      dates.push({ value: dateStr + 'T00:00', label: label });
+    }
+
+    const fromSelect = document.getElementById('fromDate');
+    const toSelect = document.getElementById('toDate');
+
+    // Populate From dropdown
+    dates.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.value;
+      opt.textContent = d.label;
+      fromSelect.appendChild(opt);
+    });
+
+    // Populate To dropdown
+    dates.forEach(d => {
+      const opt = document.createElement('option');
+      opt.value = d.value;
+      opt.textContent = d.label;
+      toSelect.appendChild(opt);
+    });
+
+    // Set default To date to today
+    toSelect.value = now.toISOString().slice(0, 10) + 'T23:59';
+  }
+
+  populateDateDropdowns();
+
   function setRange(days, btn) {
     document.querySelectorAll('.quick-btn').forEach(b => b.classList.remove('active'));
     if (btn) btn.classList.add('active');
-    const now = new Date(), from = new Date();
+    
+    const now = new Date();
+    const from = new Date();
+    
+    let fromValue;
     if (days === 0) {
-      document.getElementById('fromDate').value = '2024-01-01T00:00';
+      fromValue = '2024-01-01T00:00';
     } else {
       from.setDate(now.getDate() - days);
-      document.getElementById('fromDate').value = toLocalDatetime(from);
+      fromValue = from.toISOString().slice(0, 10) + 'T00:00';
     }
-    document.getElementById('toDate').value = toLocalDatetime(now);
-  }
-
-  function toLocalDatetime(date) {
-    const d = new Date(date - date.getTimezoneOffset() * 60000);
-    return d.toISOString().slice(0, 16);
+    
+    const toValue = now.toISOString().slice(0, 10) + 'T23:59';
+    
+    document.getElementById('fromDate').value = fromValue;
+    document.getElementById('toDate').value = toValue;
   }
 
   // ── FETCH DATA ──
@@ -803,6 +879,31 @@
       console.error(err);
     }
     document.getElementById('fetchBtn').disabled = false;
+  }
+
+  // ── TRIGGER ESP WEIGH ──
+  async function triggerWeigh(itemIndex) {
+    const itemName = ITEMS[itemIndex].name;
+    setStatus(`Triggering weigh for ${itemName}...`, 'loading');
+    
+    try {
+      // Send request to ESP to weigh the item
+      const response = await fetch(`${ESP_API_BASE}/weigh?item=${itemIndex}`, {
+        method: 'GET',
+        mode: 'no-cors'
+      });
+      
+      setStatus(`${itemName} weigh triggered. Data will be available shortly.`, 'success');
+      
+      // Wait a moment, then fetch the latest data
+      setTimeout(() => {
+        fetchData();
+      }, 2000);
+      
+    } catch (err) {
+      setStatus(`Error triggering weigh for ${itemName}. Ensure ESP is connected.`, 'error');
+      console.error(err);
+    }
   }
 
   // ── CHART RENDER ──
