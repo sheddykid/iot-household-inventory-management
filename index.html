@@ -36,9 +36,9 @@
       --accent2: #ff6b6b;
       --accent3: #ffd93d;
       --accent4: #6bcbff;
-      --rice: #00d4aa;
+      --garri: #00d4aa;
       --beans: #ff6b6b;
-      --garri: #ffd93d;
+      --rice: #ffd93d;
       --detergent: #6bcbff;
     }
 
@@ -314,9 +314,9 @@
       top: 0; left: 0; right: 0;
       height: 3px;
     }
-    .stat-card.rice::before      { background: var(--rice); }
+    .stat-card.garri::before      { background: var(--garri); }
     .stat-card.beans::before     { background: var(--beans); }
-    .stat-card.garri::before     { background: var(--garri); }
+    .stat-card.rice::before     { background: var(--rice); }
     .stat-card.detergent::before { background: var(--detergent); }
 
     .stat-label {
@@ -328,9 +328,9 @@
       margin-bottom: 0.6rem;
     }
     .stat-name { font-size: 1rem; font-weight: 800; margin-bottom: 0.3rem; }
-    .stat-card.rice .stat-name      { color: var(--rice); }
+    .stat-card.garri .stat-name      { color: var(--garri); }
     .stat-card.beans .stat-name     { color: var(--beans); }
-    .stat-card.garri .stat-name     { color: var(--garri); }
+    .stat-card.rice .stat-name     { color: var(--rice); }
     .stat-card.detergent .stat-name { color: var(--detergent); }
 
     .stat-weight {
@@ -349,9 +349,9 @@
       overflow: hidden;
     }
     .stat-bar { height: 100%; border-radius: 999px; transition: width 0.8s ease; }
-    .stat-card.rice .stat-bar      { background: var(--rice); }
+    .stat-card.garri .stat-bar      { background: var(--garri); }
     .stat-card.beans .stat-bar     { background: var(--beans); }
-    .stat-card.garri .stat-bar     { background: var(--garri); }
+    .stat-card.rice .stat-bar     { background: var(--rice); }
     .stat-card.detergent .stat-bar { background: var(--detergent); }
 
     .stat-pct {
@@ -599,13 +599,13 @@
 
   <!-- Stat Cards -->
   <div class="stat-grid">
-    <div class="stat-card rice">
+    <div class="stat-card garri">
       <div class="stat-label">Item 01</div>
-      <div class="stat-name">Rice</div>
-      <div class="stat-weight" id="riceWt">-- <span>g</span></div>
-      <div class="stat-bar-wrap"><div class="stat-bar" id="riceBar" style="width:0%"></div></div>
-      <div class="stat-pct" id="ricePct">Stock: --%</div>
-      <div class="stat-scan" id="riceScan">Last scan: <strong>--</strong></div>
+      <div class="stat-name">Garri</div>
+      <div class="stat-weight" id="garriWt">-- <span>g</span></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="garriBar" style="width:0%"></div></div>
+      <div class="stat-pct" id="garriPct">Stock: --%</div>
+      <div class="stat-scan" id="garriScan">Last scan: <strong>--</strong></div>
       <button class="stat-weigh-btn" onclick="triggerWeigh(0)">⚖ Weigh Item</button>
     </div>
     <div class="stat-card beans">
@@ -617,13 +617,13 @@
       <div class="stat-scan" id="beansScan">Last scan: <strong>--</strong></div>
       <button class="stat-weigh-btn" onclick="triggerWeigh(1)">⚖ Weigh Item</button>
     </div>
-    <div class="stat-card garri">
+    <div class="stat-card rice">
       <div class="stat-label">Item 03</div>
-      <div class="stat-name">Garri</div>
-      <div class="stat-weight" id="garriWt">-- <span>g</span></div>
-      <div class="stat-bar-wrap"><div class="stat-bar" id="garriBar" style="width:0%"></div></div>
-      <div class="stat-pct" id="garriPct">Stock: --%</div>
-      <div class="stat-scan" id="garriScan">Last scan: <strong>--</strong></div>
+      <div class="stat-name">Rice</div>
+      <div class="stat-weight" id="riceWt">-- <span>g</span></div>
+      <div class="stat-bar-wrap"><div class="stat-bar" id="riceBar" style="width:0%"></div></div>
+      <div class="stat-pct" id="ricePct">Stock: --%</div>
+      <div class="stat-scan" id="riceScan">Last scan: <strong>--</strong></div>
       <button class="stat-weigh-btn" onclick="triggerWeigh(2)">⚖ Weigh Item</button>
     </div>
     <div class="stat-card detergent">
@@ -666,12 +666,12 @@
           <tr>
             <th>#</th>
             <th>Date &amp; Time</th>
-            <th>Rice (g)</th>
-            <th>Rice Stock</th>
-            <th>Beans (g)</th>
-            <th>Beans Stock</th>
             <th>Garri (g)</th>
             <th>Garri Stock</th>
+            <th>Beans (g)</th>
+            <th>Beans Stock</th>
+            <th>Rice (g)</th>
+            <th>Rice Stock</th>
             <th>Detergent (g)</th>
             <th>Det. Stock</th>
           </tr>
@@ -697,9 +697,9 @@
   const ESP_API_BASE = 'https://provider-fantastic-viable.ngrok-free.dev';
 
   const ITEMS = [
-    { name: 'Rice',      weightField: 1, stockField: 2, color: '#00d4aa', max: 5000 },
+    { name: 'Garri',      weightField: 1, stockField: 2, color: '#00d4aa', max: 5000 },
     { name: 'Beans',     weightField: 3, stockField: 4, color: '#ff6b6b', max: 1200 },
-    { name: 'Garri',     weightField: 5, stockField: 6, color: '#ffd93d', max: 3000 },
+    { name: 'Rice',     weightField: 5, stockField: 6, color: '#ffd93d', max: 3000 },
     { name: 'Detergent', weightField: 7, stockField: 8, color: '#6bcbff', max: 250  },
   ];
 
@@ -974,9 +974,9 @@
   // ── STAT CARDS ──
   function updateStatCards(feeds) {
     const ids = [
-      { wId:'riceWt',  pId:'ricePct',  bId:'riceBar',  sId:'riceScan',  wf:'field1', sf:'field2' },
+      { wId:'garriWt',  pId:'garriPct',  bId:'garriBar',  sId:'garriScan',  wf:'field1', sf:'field2' },
       { wId:'beansWt', pId:'beansPct', bId:'beansBar', sId:'beansScan', wf:'field3', sf:'field4' },
-      { wId:'garriWt', pId:'garriPct', bId:'garriBar', sId:'garriScan', wf:'field5', sf:'field6' },
+      { wId:'riceWt', pId:'ricePct', bId:'riceBar', sId:'riceScan', wf:'field5', sf:'field6' },
       { wId:'detWt',   pId:'detPct',   bId:'detBar',   sId:'detScan',   wf:'field7', sf:'field8' },
     ];
 
@@ -1009,7 +1009,7 @@
   // ── LOW STOCK ALERT ──
   function checkLowStock(feeds) {
     const stockFields = ['field2','field4','field6','field8'];
-    const names = ['Rice','Beans','Garri','Detergent'];
+    const names = ['Garri','Beans','Rice','Detergent'];
     const lowItems = [];
 
     names.forEach((name, i) => {
