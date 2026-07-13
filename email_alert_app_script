@@ -1,0 +1,30 @@
+function doPost(e) {
+  try {
+    var data = JSON.parse(e.postData.contents);
+
+    var recipients = "e.timilehinbabalola@gmail.com, olupanafeyisayo@gmail.com, victoralabi14@gmail.com, olayinkaoye@run.edu.ng";
+    
+    MailApp.sendEmail({
+      to: "e.timilehinbabalola@gmail.com",
+      bcc: "olayinkaoye@run.edu.ng, victoralabi14@gmail.com, olupanafeyisayo@gmail.com",
+      name: "Inventory Management System",                    // ← Shows as sender name
+      replyTo: "babularbossman@gmail.com",
+      subject: "Low Stock Alert: " + data.item,
+      htmlBody: `
+        <h2>🚨 Low Stock Alert!</h2>
+        <p><strong>Item:</strong> ${data.item}</p>
+        <p><strong>Current Stock:</strong> ${data.stock}%</p>
+        <p><strong>Current Weight:</strong> ${data.weight}g</p>
+        <p>Please restock as soon as possible.</p>
+        <hr>
+        <small>This is an automated alert from your IoT Household Inventory System.</small>
+      `,
+      // Plain text version (helps avoid spam filters)
+      body: `Low Stock Alert!\n\nItem: ${data.item}\nCurrent Stock: ${data.stock}%\nCurrent Weight: ${data.weight}g\n\nPlease restock soon.\n\nSent from ESP32 Inventory System`
+    });
+    
+    return ContentService.createTextOutput("Success");
+  } catch (error) {
+    return ContentService.createTextOutput("Error: " + error);
+  }
+}
