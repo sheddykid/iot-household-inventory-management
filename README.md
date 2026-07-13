@@ -14,18 +14,18 @@ A smart IoT-based system for real-time household inventory monitoring using weig
 
 - Real-time weight monitoring using HX711 Load Cell
 - Item identification with MFRC522 RFID
-- Local display with 0.96" OLED SSD1306
-- Wi-Fi connectivity via ESP32
+- Local display with 16x4 LCD
+- Wi-Fi connectivity via ESP32-C6
 - Low-stock and usage alerts
-- Cloud integration (ThingSpeak / Blynk ready)
+- Cloud integration (ThingSpeak ready)
 - Affordable and scalable for household use
 
 ## 🛠 Hardware Components
 
-- **Microcontroller:** ESP32 DevKitC V4
-- **Weight Sensor:** HX711 + Load Cell (50kg)
+- **Microcontroller:** ESP32-C6 DevKitC V4
+- **Weight Sensor:** HX711 + 4 Load CellS (50kg)
 - **RFID:** MFRC522 Module
-- **Display:** SSD1306 OLED 0.96"
+- **Display:**  16x4 LCD
 
 ## 📁 Project Structure
 
