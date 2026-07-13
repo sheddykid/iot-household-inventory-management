@@ -1,30 +1,400 @@
 function doPost(e) {
   try {
+
+    // ==========================
+    // Parse incoming JSON
+    // ==========================
     var data = JSON.parse(e.postData.contents);
 
-    var recipients = "e.timilehinbabalola@gmail.com, olupanafeyisayo@gmail.com, victoralabi14@gmail.com, olayinkaoye@run.edu.ng";
-    
+    var item = data.item;
+    var stock = parseFloat(data.stock);
+    var weight = data.weight;
+
+    var dashboardURL = "https://sheddykid.github.io/iot-household-inventory-management/";
+
+    // Current Date & Time
+    var timestamp = Utilities.formatDate(
+      new Date(),
+      Session.getScriptTimeZone(),
+      "EEEE, dd MMMM yyyy 'at' hh:mm a"
+    );
+
+    // =====================================
+    // Circular Progress Calculations
+    // =====================================
+
+    var radius = 75;
+    var circumference = 2 * Math.PI * radius;
+
+    stock = Math.max(0, Math.min(100, stock));
+
+    var dashOffset = circumference - (stock / 100) * circumference;
+
+    // =====================================
+    // Send Email
+    // =====================================
+
     MailApp.sendEmail({
+
       to: "e.timilehinbabalola@gmail.com",
-      bcc: "olayinkaoye@run.edu.ng, victoralabi14@gmail.com, olupanafeyisayo@gmail.com",
-      name: "Inventory Management System",                    // ← Shows as sender name
+
+      bcc: "olayinkaoye@run.edu.ng,victoralabi14@gmail.com,olupanafeyisayo@gmail.com",
+
+      name: "IoT Household Inventory System",
+
       replyTo: "babularbossman@gmail.com",
-      subject: "Low Stock Alert: " + data.item,
+
+      subject: "Inventory Reminder - " + item + " is Running Low",
+
       htmlBody: `
-        <h2>🚨 Low Stock Alert!</h2>
-        <p><strong>Item:</strong> ${data.item}</p>
-        <p><strong>Current Stock:</strong> ${data.stock}%</p>
-        <p><strong>Current Weight:</strong> ${data.weight}g</p>
-        <p>Please restock as soon as possible.</p>
-        <hr>
-        <small>This is an automated alert from your IoT Household Inventory System.</small>
-      `,
-      // Plain text version (helps avoid spam filters)
-      body: `Low Stock Alert!\n\nItem: ${data.item}\nCurrent Stock: ${data.stock}%\nCurrent Weight: ${data.weight}g\n\nPlease restock soon.\n\nSent from ESP32 Inventory System`
+
+<!DOCTYPE html>
+
+<html>
+
+<body style="margin:0;padding:30px;background:#f3f4f6;font-family:Arial,Helvetica,sans-serif;">
+
+<table width="100%" cellpadding="0" cellspacing="0">
+
+<tr>
+
+<td align="center">
+
+<table width="650"
+style="background:#ffffff;
+border-radius:15px;
+overflow:hidden;
+box-shadow:0 8px 20px rgba(0,0,0,.12);">
+
+<!-- HEADER -->
+
+<tr>
+
+<td style="
+background:#1565C0;
+color:white;
+text-align:center;
+padding:35px;">
+
+<h1 style="margin:0;">
+📦 IoT Household Inventory Management System
+</h1>
+
+<p style="margin-top:10px;">
+Smart Inventory Monitoring & Notification
+</p>
+
+</td>
+
+</tr>
+
+<!-- INTRO -->
+
+<tr>
+
+<td style="padding:35px;">
+
+<h2 style="color:#1565C0;margin-top:0;">
+
+Hello,
+
+</h2>
+
+<p style="font-size:16px;
+line-height:1.8;
+color:#555;">
+
+This is a friendly reminder that your
+<strong>${item}</strong>
+stock is running low.
+
+Based on the latest weight measurement, you may want to restock it soon to keep your household inventory up to date.
+
+</p>
+
+</td>
+
+</tr>
+
+<!-- INVENTORY DETAILS -->
+
+<tr>
+
+<td style="padding:0 35px 30px;">
+
+<div style="
+border:1px solid #E5E5E5;
+border-radius:12px;
+padding:25px;">
+
+<h2 style="margin-top:0;color:#1565C0;">
+
+📋 Inventory Details
+
+</h2>
+
+<table width="100%" style="border-collapse:collapse;">
+
+<tr>
+
+<td style="padding:12px 0;"><strong>Item</strong></td>
+
+<td align="right">${item}</td>
+
+</tr>
+
+<tr>
+
+<td style="padding:12px 0;"><strong>Current Weight</strong></td>
+
+<td align="right">${weight} g</td>
+
+</tr>
+
+<tr>
+
+<td style="padding:12px 0;"><strong>Stock Level</strong></td>
+
+<td align="right">${stock}%</td>
+
+</tr>
+
+<tr>
+
+<td style="padding:12px 0;"><strong>Status</strong></td>
+
+<td align="right">
+
+<span style="
+background:#FFE0B2;
+color:#E65100;
+padding:7px 16px;
+border-radius:20px;
+font-weight:bold;">
+
+LOW STOCK
+
+</span>
+
+</td>
+
+</tr>
+
+<tr>
+
+<td style="padding:12px 0;"><strong>Updated</strong></td>
+
+<td align="right">${timestamp}</td>
+
+</tr>
+
+</table>
+
+</div>
+
+</td>
+
+</tr>
+
+<!-- CIRCLE -->
+
+<tr>
+
+<td align="center">
+
+<h2 style="color:#1565C0;">
+
+Current Stock Level
+
+</h2>
+
+<svg width="190" height="190">
+
+<circle
+cx="95"
+cy="95"
+r="${radius}"
+stroke="#E5E5E5"
+stroke-width="14"
+fill="none"/>
+
+<circle
+cx="95"
+cy="95"
+r="${radius}"
+stroke="#F9A825"
+stroke-width="14"
+fill="none"
+stroke-linecap="round"
+stroke-dasharray="${circumference}"
+stroke-dashoffset="${dashOffset}"
+transform="rotate(-90 95 95)"/>
+
+<text
+x="95"
+y="90"
+text-anchor="middle"
+font-size="34"
+font-weight="bold"
+fill="#1565C0">
+
+${stock}%
+
+</text>
+
+<text
+x="95"
+y="115"
+text-anchor="middle"
+font-size="14"
+fill="#777">
+
+Remaining
+
+</text>
+
+</svg>
+
+</td>
+
+</tr>
+
+<!-- REMINDER -->
+
+<tr>
+
+<td style="padding:25px 35px;">
+
+<div style="
+background:#F7FAFC;
+border-left:5px solid #1565C0;
+padding:20px;
+border-radius:10px;">
+
+<h3 style="margin-top:0;color:#1565C0;">
+
+💡 Reminder
+
+</h3>
+
+<p style="line-height:1.8;color:#555;">
+
+Don't forget to restock your
+<strong>${item}</strong>
+when convenient.
+
+Your inventory will continue to be monitored automatically, and the latest information is always available on your dashboard.
+
+</p>
+
+</div>
+
+</td>
+
+</tr>
+
+<!-- BUTTON -->
+
+<tr>
+
+<td align="center" style="padding-bottom:35px;">
+
+<a href="${dashboardURL}"
+
+style="
+display:inline-block;
+background:#1565C0;
+color:white;
+padding:16px 42px;
+font-size:17px;
+font-weight:bold;
+text-decoration:none;
+border-radius:8px;">
+
+Open Dashboard
+
+</a>
+
+</td>
+
+</tr>
+
+<!-- FOOTER -->
+
+<tr>
+
+<td style="
+background:#263238;
+color:white;
+text-align:center;
+padding:25px;
+font-size:14px;">
+
+<strong>IoT Household Inventory Management System</strong>
+
+<br><br>
+
+This is an automated notification generated by your Household Inventory Management System.
+
+<br><br>
+
+<strong>Please do not reply to this email.</strong>
+
+<br><br>
+
+© 2026 IoT Household Inventory Management System
+
+</td>
+
+</tr>
+
+</table>
+
+</td>
+
+</tr>
+
+</table>
+
+</body>
+
+</html>
+
+`,
+
+      body:
+
+`Inventory Reminder
+
+Hello,
+
+Your ${item} stock is running low.
+
+Current Weight : ${weight} g
+
+Stock Level : ${stock}%
+
+Updated : ${timestamp}
+
+Dashboard:
+${dashboardURL}
+
+Don't forget to restock your ${item} when convenient.
+
+Please do not reply to this email.
+
+IoT Household Inventory Management System`
+
     });
-    
+
     return ContentService.createTextOutput("Success");
-  } catch (error) {
-    return ContentService.createTextOutput("Error: " + error);
+
   }
+
+  catch(error){
+
+    return ContentService.createTextOutput("Error: " + error);
+
+  }
+
 }
