@@ -1,6 +1,6 @@
 // ================================================
-// IoT Household Inventory Management System
-// Final Year Project - Babalola Emmanuel Timilehin
+// Final Year Project -
+// Babalola Emmanuel Timilehin
 // ESP32-C6 - LCD + WiFi + Buzzer + Email Alert + HX711
 // ================================================
 
@@ -170,12 +170,15 @@ void setup() {
   Serial.println("[INIT] HX711 load cell initialized.");
 
   ThingSpeak.begin(client);
-  client.setTimeout(3000);  // cap connect/read attempts at 3s - without this,
-                             // a WiFi link that's associated but has no real
-                             // internet path (router up, WAN down) can block
-                             // writeFields() for tens of seconds with the LCD
-                             // frozen, since these calls run synchronously
-                             // inside processRFID()/sendDailyUpload().
+  client.setTimeout(3000); 
+  
+  // cap connect/read attempts at 3s - without this,
+  // a WiFi link that's associated but has no real
+  // internet path (router up, WAN down) can block
+  // writeFields() for tens of seconds with the LCD
+  // frozen, since these calls run synchronously
+  // inside processRFID()/sendDailyUpload().
+  
   Serial.println("[INIT] ThingSpeak client initialized (3s connect timeout).");
 
   configTime(3600, 0, "pool.ntp.org", "time.nist.gov");  // WAT timezone
@@ -502,7 +505,6 @@ void processRFID() {
       // restock is detected, the new weight becomes this item's new 100%
       // reference (lastRestockWeight) going forward - other items are
       // unaffected and keep their own reference (default 15.0 kg).
-      //
       // First scan since boot is a special case: there is no real previous
       // reading to compare against yet (lastKnownWeight is just a 0.0
       // placeholder), so the delta check is skipped entirely. The reading
