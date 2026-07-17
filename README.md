@@ -88,7 +88,7 @@ Live at [sheddykid.github.io/iot-household-inventory-management](https://sheddyk
 
 ## 📄 Documentation
 
-- Full project report in `docs/`
+- Full project report in [Report](https://github.com/sheddykid/iot-household-inventory-management/blob/main/Final_Project.pdf)
 - Presentation slides in `docs/`
 
 ## License
