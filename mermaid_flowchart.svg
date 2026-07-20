@@ -1,0 +1,91 @@
+flowchart TD
+    %% =========================
+    %% IoT Household Inventory Management System
+    %% Firmware Flowchart
+    %% =========================
+
+    A([Power On])
+    B[Initialize LCD<br/>HX711<br/>RFID Reader]
+    C[Connect to Wi-Fi<br/>(Non-blocking)]
+    D[Display Home Screen]
+
+    E{RFID Tag<br/>Scanned?}
+
+    F{RFID Tag<br/>Recognized?}
+
+    G[Display<br/>"Unknown Item"]
+    H[Wait 5 Seconds]
+    R1[Return to<br/>Home Screen]
+
+    I[Identify Item]
+    J[Read Corresponding<br/>Weight Sensor]
+
+    K[Calculate Weight]
+    L[Calculate Stock Percentage]
+
+    M[Update LCD]
+
+    N[Upload Data to<br/>ThingSpeak]
+
+    O{Stock Below<br/>20%?}
+
+    P[Trigger Low-Stock<br/>Email Alert]
+
+    R2[Return to<br/>Home Screen]
+
+    T{5-Minute Upload<br/>Timer Elapsed?}
+
+    U[Upload All Four Items<br/>Sequentially<br/>(16 s Interval)]
+
+    %% Main Flow
+    A --> B
+    B --> C
+    C --> D
+    D --> E
+
+    %% RFID Scan
+    E -- No --> T
+    E -- Yes --> F
+
+    %% RFID Recognition
+    F -- Yes --> I
+    F -- No --> G
+
+    %% Unknown Tag
+    G --> H
+    H --> R1
+    R1 --> D
+
+    %% Item Processing
+    I --> J
+    J --> K
+    K --> L
+    L --> M
+    M --> N
+    N --> O
+
+    %% Low Stock Decision
+    O -- Yes --> P
+    O -- No --> R2
+
+    P --> R2
+    R2 --> D
+
+    %% Scheduled Upload
+    T -- Yes --> U
+    T -- No --> D
+
+    U --> D
+
+    %% Styling
+    classDef start fill:#d5f5e3,stroke:#2e7d32,color:#000,stroke-width:2px;
+    classDef process fill:#eaf2ff,stroke:#1565c0,color:#000;
+    classDef decision fill:#fff3cd,stroke:#f39c12,color:#000;
+    classDef alert fill:#fdecea,stroke:#c62828,color:#000;
+    classDef return fill:#f5f5f5,stroke:#616161,color:#000;
+
+    class A start;
+    class B,C,D,I,J,K,L,M,N,U process;
+    class E,F,O,T decision;
+    class P alert;
+    class G,H,R1,R2 return;
