@@ -6,8 +6,36 @@
   <title>Household Inventory Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
   <style>
     /* ── THEME VARIABLES ── */
+    .user-menu{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  margin-left:auto;
+}
+  .user-details{
+  display:flex;
+  flex-direction:column;
+  text-align:right;
+}
+  .user-details small{
+  opacity:.75;
+  font-size:.8rem;
+}
+#logoutBtn{
+  padding:10px 16px;
+  background:#00d4aa;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+}
+#logoutBtn:hover{
+opacity:.9;
+}
     [data-theme="dark"] {
       --bg: #0a0e1a;
       --card: #111827;
@@ -44,7 +72,7 @@
 
     * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body {
+     {
       background: var(--bg);
       color: var(--text);
       font-family: 'Syne', sans-serif;
@@ -53,7 +81,7 @@
       transition: background 0.3s, color 0.3s;
     }
 
-    body::before {
+    ::before {
       content: '';
       position: fixed;
       inset: 0;
@@ -475,9 +503,9 @@
       border-bottom: 1px solid var(--border);
       white-space: nowrap;
     }
-    tbody tr:nth-child(odd) { background: var(--table-odd); }
-    tbody tr:hover { background: rgba(0,212,170,0.05); }
-    tbody td {
+    t tr:nth-child(odd) { background: var(--table-odd); }
+    t tr:hover { background: rgba(0,212,170,0.05); }
+    t td {
       padding: 0.6rem 1rem;
       color: var(--text);
       border-bottom: 1px solid var(--border);
@@ -521,8 +549,8 @@
 
     /* ── PRINT STYLES ── */
     @media print {
-      body { background: white !important; color: black !important; }
-      body::before { display: none; }
+       { background: white !important; color: black !important; }
+      ::before { display: none; }
       .controls, .status-bar, .btn-group, .print-btn,
       .theme-toggle, .toggle-btns, .stat-weigh-btn { display: none !important; }
       .chart-card, .stat-card, .table-card, .alert-banner {
@@ -533,7 +561,7 @@
     }
   </style>
 </head>
-<body>
+<>
 <div class="container">
 
   <!-- Header -->
@@ -550,6 +578,16 @@
         ThingSpeak Live
       </div>
     </div>
+    <div id="userMenu" class="user-menu" style="display:none;">
+    <div class="user-details">
+        <div id="userName">Loading...</div>
+        <small id="userEmail"></small>
+    </div>
+
+    <button id="logoutBtn">
+        Logout
+    </button>
+</div>
   </header>
 
   <!-- Low Stock Alert Banner -->
@@ -676,7 +714,7 @@
             <th>Det. Stock</th>
           </tr>
         </thead>
-        <tbody id="tableBody">
+        <t id="table">
           <tr><td colspan="10" class="no-data">Fetch data to populate table</td></tr>
         </tbody>
       </table>
@@ -1082,6 +1120,51 @@
     if (btn) btn.classList.add('active');
     if (allData) renderChart(allData);
   }
+</script>
+  <script>
+
+const supabase = window.supabase.createClient(
+    window.SUPABASE_URL,
+    window.SUPABASE_ANON_KEY
+);
+let currentUser = null;
+async function protectDashboard(){
+    const { data, error } =
+        await supabase.auth.getSession();
+    if(error){
+        console.error(error);
+        location.href="login.html";
+        return;
+    }
+    if(!data.session){
+        location.href="login.html";
+        return;
+    }
+    currentUser = data.session.user;
+    document.getElementById("userMenu").style.display="flex";
+    document.getElementById("userEmail").textContent =
+        currentUser.email;
+    const fullName =
+        currentUser.user_metadata?.full_name;
+    document.getElementById("userName").textContent =
+        fullName || "User";
+}
+protectDashboard();
+</script>
+<script>
+document
+.getElementById("logoutBtn")
+.addEventListener("click", async ()=>{
+    await supabase.auth.signOut();
+    location.href="login.html";
+});
+</script>
+  <script>
+supabase.auth.onAuthStateChange((event)=>{
+    if(event==="SIGNED_OUT"){
+        location.href="login.html";
+    }
+});
 </script>
 </body>
 </html>
