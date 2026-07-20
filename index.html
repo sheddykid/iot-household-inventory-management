@@ -5,7 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Household Inventory Dashboard</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet"/>
-<script src="dashboard.js"></script>
+<script>
+const supabase = window.supabaseClient;
+(async () => {
+    const { data } = await supabase.auth.getSession();
+    if (!data.session) {
+        window.location.href = "login.html";
+        return;
+    }
+    const user = data.session.user;
+    window.currentUser = user;
+})();
+</script>
+  <script src="dashboard.js"></script>
   <style>
     /* ── THEME VARIABLES ── */
     .user-menu{
@@ -219,6 +231,28 @@ opacity:.9;
       font-size: 0.65rem;
       font-weight: 700;
     }
+    .user-panel{
+  display:flex;
+  align-items:center;
+  gap:15px;
+}
+#loggedUser{
+  font-size:14px;
+  font-weight:600;
+  color:white;
+}
+#logoutBtn{
+  background:#00d4aa;
+  padding:10px 18px;
+  border:none;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:bold;
+  transition:.3s;
+}
+#logoutBtn:hover{
+  transform:translateY(-2px);
+}
 
     /* ── CONTROLS ── */
     .controls {
@@ -575,11 +609,8 @@ opacity:.9;
         ThingSpeak Live
       </div>
     </div>
-    <div id="userMenu" class="user-menu" style="display:none;">
-    <div class="user-details">
-        <div id="userName">Loading...</div>
-        <small id="userEmail"></small>
-    </div>
+    <div class="user-panel">
+    <span id="loggedUser"></span>
     <button id="logoutBtn">
         Logout
     </button>
