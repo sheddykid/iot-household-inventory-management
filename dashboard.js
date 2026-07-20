@@ -45,9 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let allData = null;
     let myChart = null;
     let isDark = true;
-
- 
-   <script>
+    
   const CHANNEL_ID = 3399453;
   const READ_KEY   = '03Y0EYTKSY2G4CS3';
 
@@ -440,10 +438,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btn) btn.classList.add('active');
     if (allData) renderChart(allData);
   }
-</script>
-  <script>
-
-const supabase = window.supabase.createClient(
+  const supabase = window.supabase.createClient(
     window.SUPABASE_URL,
     window.SUPABASE_ANON_KEY
 );
@@ -470,21 +465,14 @@ async function protectDashboard(){
         fullName || "User";
 }
 protectDashboard();
-</script>
-<script>
 document
 .getElementById("logoutBtn")
 .addEventListener("click", async ()=>{
     await supabase.auth.signOut();
     location.href="login.html";
 });
-</script>
-  <script>
 supabase.auth.onAuthStateChange((event)=>{
     if(event==="SIGNED_OUT"){
         location.href="login.html";
     }
-});
-</script>
-)
-});
+})})
