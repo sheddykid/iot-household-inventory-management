@@ -62,7 +62,7 @@ Follow `diagram.json` (16x4 LCD build) — this is the circuit `sketch.ino` is w
 **2. Configure and flash the firmware**
 - Open the project in PlatformIO (`platformio.ini` targets `esp32doit-devkit-v1`) or Arduino IDE.
 - Install the libraries listed in `platformio.ini`: `LiquidCrystal_I2C`, `MFRC522`, `ThingSpeak`, `HX711`.
-- In `sketch.ino`, set your own values for `ssid`, `password`, `channelID`, `writeAPIKey`, and `googleScriptURL` — do not commit real credentials (see security note above).
+- In `sketch.ino`, set your own values for `ssid`, `password`, `channelID`, `writeAPIKey`, and `googleScriptURL`.
 - Upload to the board.
 
 **3. Set up cloud logging**
@@ -97,4 +97,4 @@ This project is open-sourced under the MIT License.
 
 ---
 
-**Made with ❤️ for better household management**
+**Made for better household management**
