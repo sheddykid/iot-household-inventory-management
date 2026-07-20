@@ -1,0 +1,640 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Login | Household Inventory Management System</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --bg:#0a0e1a;
+    --card:#111827;
+    --border:#1e2d45;
+    --accent:#00d4aa;
+    --accent2:#6bcbff;
+    --danger:#ff6b6b;
+    --text:#edf2f7;
+    --muted:#94a3b8;
+}
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+
+background:linear-gradient(135deg,#09101f,#0a0e1a,#101a2d);
+font-family:'Syne',sans-serif;
+height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+overflow:hidden;
+color:var(--text);
+
+}
+
+body::before{
+
+content:'';
+position:fixed;
+inset:0;
+
+background-image:
+linear-gradient(rgba(0,212,170,.05) 1px, transparent 1px),
+linear-gradient(90deg,rgba(0,212,170,.05) 1px, transparent 1px);
+
+background-size:40px 40px;
+
+}
+
+.container{
+
+position:relative;
+z-index:2;
+
+display:grid;
+grid-template-columns:1fr 430px;
+
+width:1100px;
+max-width:95%;
+
+background:#101827;
+
+border:1px solid var(--border);
+
+border-radius:25px;
+
+overflow:hidden;
+
+box-shadow:0 40px 80px rgba(0,0,0,.45);
+
+}
+
+.left{
+
+padding:70px;
+
+display:flex;
+flex-direction:column;
+justify-content:center;
+
+background:linear-gradient(145deg,#101827,#09101f);
+
+}
+
+.badge{
+
+display:inline-block;
+
+padding:8px 18px;
+
+border-radius:40px;
+
+background:rgba(0,212,170,.08);
+
+color:var(--accent);
+
+font-family:"Space Mono";
+
+font-size:.75rem;
+
+margin-bottom:30px;
+
+}
+
+h1{
+
+font-size:3rem;
+
+line-height:1.1;
+
+margin-bottom:20px;
+
+}
+
+h1 span{
+
+color:var(--accent);
+
+}
+
+.left p{
+
+font-family:"Space Mono";
+
+font-size:.85rem;
+
+line-height:1.8;
+
+color:var(--muted);
+
+max-width:500px;
+
+}
+
+.right{
+
+padding:50px;
+
+background:#111827;
+
+}
+
+.tabs{
+
+display:flex;
+
+margin-bottom:30px;
+
+}
+
+.tab{
+
+flex:1;
+
+padding:14px;
+
+border:none;
+
+background:#0a0e1a;
+
+color:#888;
+
+cursor:pointer;
+
+font-weight:700;
+
+font-family:Syne;
+
+transition:.3s;
+
+}
+
+.tab.active{
+
+background:var(--accent);
+
+color:#000;
+
+}
+
+.form{
+
+display:none;
+
+}
+
+.form.active{
+
+display:block;
+
+animation:fade .4s;
+
+}
+
+@keyframes fade{
+
+from{
+
+opacity:0;
+transform:translateY(15px);
+
+}
+
+to{
+
+opacity:1;
+transform:translateY(0);
+
+}
+
+}
+
+.form h2{
+
+margin-bottom:25px;
+
+font-size:2rem;
+
+}
+
+.input-group{
+
+margin-bottom:18px;
+
+}
+
+.input-group label{
+
+display:block;
+
+margin-bottom:8px;
+
+font-family:"Space Mono";
+
+font-size:.75rem;
+
+color:var(--muted);
+
+}
+
+.input-group input{
+
+width:100%;
+
+padding:14px 18px;
+
+border-radius:10px;
+
+border:1px solid var(--border);
+
+background:#0a0e1a;
+
+color:white;
+
+font-size:.95rem;
+
+outline:none;
+
+transition:.25s;
+
+}
+
+.input-group input:focus{
+
+border-color:var(--accent);
+
+}
+
+.password-box{
+
+position:relative;
+
+}
+
+.toggle{
+
+position:absolute;
+
+right:18px;
+top:15px;
+
+cursor:pointer;
+
+color:#999;
+
+}
+
+button.submit{
+
+width:100%;
+
+padding:15px;
+
+margin-top:10px;
+
+background:var(--accent);
+
+border:none;
+
+font-size:1rem;
+
+font-weight:700;
+
+cursor:pointer;
+
+border-radius:10px;
+
+transition:.25s;
+
+}
+
+button.submit:hover{
+
+transform:translateY(-2px);
+
+}
+
+.extra{
+
+margin-top:25px;
+
+text-align:center;
+
+font-size:.9rem;
+
+color:var(--muted);
+
+}
+
+.extra a{
+
+color:var(--accent2);
+
+text-decoration:none;
+
+}
+
+.message{
+
+display:none;
+
+padding:14px;
+
+border-radius:10px;
+
+margin-bottom:20px;
+
+font-size:.9rem;
+
+}
+
+.success{
+
+display:block;
+
+background:rgba(0,212,170,.15);
+
+border:1px solid rgba(0,212,170,.4);
+
+color:#7df0d5;
+
+}
+
+.error{
+
+display:block;
+
+background:rgba(255,107,107,.12);
+
+border:1px solid rgba(255,107,107,.4);
+
+color:#ffb3b3;
+
+}
+
+@media(max-width:900px){
+
+.container{
+
+grid-template-columns:1fr;
+
+}
+
+.left{
+
+display:none;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="left">
+
+<div class="badge">
+IOT HOUSEHOLD INVENTORY MANAGEMENT SYSTEM
+</div>
+
+<h1>
+
+Smart <span>Inventory</span><br>
+
+Monitoring Dashboard
+
+</h1>
+
+<p>
+
+Monitor household inventory remotely, receive stock alerts,
+view live analytics, manage RFID scans and securely access
+your dashboard using Supabase Authentication.
+
+</p>
+
+</div>
+
+<div class="right">
+
+<div class="tabs">
+
+<button class="tab active" onclick="showLogin(this)">
+Login
+</button>
+
+<button class="tab" onclick="showRegister(this)">
+Register
+</button>
+
+</div>
+
+<div id="msg" class="message"></div>
+
+<!-- LOGIN -->
+
+<form id="loginForm" class="form active">
+
+<h2>Welcome Back</h2>
+
+<div class="input-group">
+
+<label>Email</label>
+
+<input
+type="email"
+id="loginEmail"
+placeholder="Enter your email"
+required>
+
+</div>
+
+<div class="input-group">
+
+<label>Password</label>
+
+<div class="password-box">
+
+<input
+type="password"
+id="loginPassword"
+placeholder="Password"
+required>
+
+<span class="toggle" onclick="togglePassword('loginPassword')">
+
+👁
+
+</span>
+
+</div>
+
+</div>
+
+<button class="submit">
+
+Sign In
+
+</button>
+
+<div class="extra">
+
+<a href="#" id="forgotPassword">
+
+Forgot Password?
+
+</a>
+
+</div>
+
+</form>
+
+<!-- REGISTER -->
+
+<form id="registerForm" class="form">
+
+<h2>Create Account</h2>
+
+<div class="input-group">
+
+<label>Full Name</label>
+
+<input
+type="text"
+id="registerName"
+required>
+
+</div>
+
+<div class="input-group">
+
+<label>Email</label>
+
+<input
+type="email"
+id="registerEmail"
+required>
+
+</div>
+
+<div class="input-group">
+
+<label>Password</label>
+
+<div class="password-box">
+
+<input
+type="password"
+id="registerPassword"
+required>
+
+<span class="toggle" onclick="togglePassword('registerPassword')">
+
+👁
+
+</span>
+
+</div>
+
+</div>
+
+<div class="input-group">
+
+<label>Confirm Password</label>
+
+<div class="password-box">
+
+<input
+type="password"
+id="confirmPassword"
+required>
+
+<span class="toggle" onclick="togglePassword('confirmPassword')">
+
+👁
+
+</span>
+
+</div>
+
+</div>
+
+<button class="submit">
+
+Create Account
+
+</button>
+
+</form>
+
+</div>
+
+</div>
+
+<script>
+
+const tabs=document.querySelectorAll(".tab");
+
+const forms=document.querySelectorAll(".form");
+
+function showLogin(btn){
+
+tabs.forEach(t=>t.classList.remove("active"));
+
+btn.classList.add("active");
+
+forms[0].classList.add("active");
+
+forms[1].classList.remove("active");
+
+}
+
+function showRegister(btn){
+
+tabs.forEach(t=>t.classList.remove("active"));
+
+btn.classList.add("active");
+
+forms[1].classList.add("active");
+
+forms[0].classList.remove("active");
+
+}
+
+function togglePassword(id){
+
+const input=document.getElementById(id);
+
+input.type=input.type==="password" ? "text":"password";
+
+}
+
+</script>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- Your config -->
+<script src="supabase-config.js"></script>
+
+<!-- Authentication logic -->
+<script src="auth.js"></script>
+
+</body>
+
+</html>
+```
