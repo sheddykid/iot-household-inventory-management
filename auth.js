@@ -4,10 +4,7 @@
 // ===============================
 
 // Create Supabase Client
-const supabase = window.supabase.createClient(
-    window.SUPABASE_URL,
-    window.SUPABASE_ANON_KEY
-);
+const supabase = window.supabaseClient;
 
 // Elements
 const loginForm = document.getElementById("loginForm");
